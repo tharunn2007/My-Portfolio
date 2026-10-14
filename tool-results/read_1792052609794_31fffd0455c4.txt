@@ -1,0 +1,887 @@
+     1→import { useState, useEffect } from "react";
+     2→import {
+     3→  ArrowRight,
+     4→  Moon,
+     5→  Power,
+     6→  RotateCcw,
+     7→  Lock,
+     8→  ChevronLeft,
+     9→  Delete,
+    10→  Volume2,
+    11→  Camera,
+    12→  Shield,
+    13→} from "lucide-react";
+    14→
+    15→const LoginScreen = ({ onLogin, isMobile }) => {
+    16→  const [password, setPassword] = useState("");
+    17→  const [isAsleep, setIsAsleep] = useState(false);
+    18→  const [isShuttingDown, setIsShuttingDown] = useState(false);
+    19→  const [showPasswordInput, setShowPasswordInput] = useState(false);
+    20→  const [error, setError] = useState(false);
+    21→  const [flashlightActive, setFlashlightActive] = useState(false);
+    22→  const [torchTrack, setTorchTrack] = useState(null);
+    23→
+    24→  const togglePhysicalTorch = async (activate) => {
+    25→    if (activate) {
+    26→      try {
+    27→        if (
+    28→          typeof navigator === "undefined" ||
+    29→          !navigator.mediaDevices ||
+    30→          !navigator.mediaDevices.getUserMedia
+    31→        )
+    32→          return;
+    33→        const stream = await navigator.mediaDevices.getUserMedia({
+    34→          video: { facingMode: "environment" },
+    35→        });
+    36→        const track = stream.getVideoTracks()[0];
+    37→        const capabilities = track.getCapabilities();
+    38→        if (capabilities.torch) {
+    39→          await track.applyConstraints({
+    40→            advanced: [{ torch: true }],
+    41→          });
+    42→          setTorchTrack(track);
+    43→        }
+    44→      } catch (err) {
+    45→        console.warn("Physical torch error:", err);
+    46→      }
+    47→    } else {
+    48→      if (torchTrack) {
+    49→        try {
+    50→          await torchTrack.applyConstraints({
+    51→            advanced: [{ torch: false }],
+    52→          });
+    53→          torchTrack.stop();
+    54→        } catch (err) {
+    55→          console.warn("Error turning off physical torch:", err);
+    56→        }
+    57→        setTorchTrack(null);
+    58→      }
+    59→    }
+    60→  };
+    61→
+    62→  useEffect(() => {
+    63→    return () => {
+    64→      if (torchTrack) {
+    65→        torchTrack.stop();
+    66→      }
+    67→    };
+    68→  }, [torchTrack]);
+    69→  const [showCameraView, setShowCameraView] = useState(false);
+    70→  const [cameraStream, setCameraStream] = useState(null);
+    71→  const [activeFilter, setActiveFilter] = useState("normal");
+    72→  const [shutterFlash, setShutterFlash] = useState(false);
+    73→
+    74→  const startCamera = async () => {
+    75→    if (
+    76→      typeof navigator === "undefined" ||
+    77→      !navigator.mediaDevices ||
+    78→      !navigator.mediaDevices.getUserMedia
+    79→    ) {
+    80→      console.warn(
+    81→        "Camera API not supported in this context (requires HTTPS or localhost). Launching mock camera.",
+    82→      );
+    83→      setShowCameraView(true);
+    84→      return;
+    85→    }
+    86→    try {
+    87→      const stream = await navigator.mediaDevices.getUserMedia({
+    88→        video: { facingMode: "user" },
+    89→        audio: false,
+    90→      });
+    91→      setCameraStream(stream);
+    92→      setShowCameraView(true);
+    93→      setTimeout(() => {
+    94→        const video = document.getElementById("lockscreen-camera-video");
+    95→        if (video) {
+    96→          video.srcObject = stream;
+    97→          video.play().catch((err) => console.log("Video playback error:", err));
+    98→        }
+    99→      }, 100);
+   100→    } catch (err) {
+   101→      console.warn("Camera API error:", err);
+   102→      // Fallback to mock if permission is denied
+   103→      setShowCameraView(true);
+   104→    }
+   105→  };
+   106→
+   107→  const stopCamera = () => {
+   108→    if (cameraStream) {
+   109→      cameraStream.getTracks().forEach((track) => track.stop());
+   110→      setCameraStream(null);
+   111→    }
+   112→    setShowCameraView(false);
+   113→  };
+   114→
+   115→  const takePhoto = () => {
+   116→    setShutterFlash(true);
+   117→    setTimeout(() => setShutterFlash(false), 250);
+   118→  };
+   119→
+   120→  useEffect(() => {
+   121→    return () => {
+   122→      if (cameraStream) {
+   123→        cameraStream.getTracks().forEach((track) => track.stop());
+   124→      }
+   125→    };
+   126→  }, [cameraStream]);
+   127→
+   128→  // Time and Date State
+   129→  const getFormattedTime = () => {
+   130→    const now = new Date();
+   131→    let hours = now.getHours();
+   132→    let minutes = now.getMinutes();
+   133→    hours = hours < 10 ? "0" + hours : hours;
+   134→    minutes = minutes < 10 ? "0" + minutes : minutes;
+   135→    return `${hours}:${minutes}`;
+   136→  };
+   137→
+   138→  const getFormattedDate = () => {
+   139→    const options = { weekday: "long", month: "long", day: "numeric" };
+   140→    return new Date().toLocaleDateString("en-US", options);
+   141→  };
+   142→
+   143→  const [time, setTime] = useState(getFormattedTime());
+   144→  const [dateStr, setDateStr] = useState(getFormattedDate());
+   145→
+   146→  useEffect(() => {
+   147→    const timer = setInterval(() => {
+   148→      setTime(getFormattedTime());
+   149→      setDateStr(getFormattedDate());
+   150→    }, 1000);
+   151→    return () => clearInterval(timer);
+   152→  }, []);
+   153→
+   154→  // Alternating between Namaste SVG (0) and Hello SVG (1) - Desktop Only
+   155→  const [activeSvg, setActiveSvg] = useState(0);
+   156→
+   157→  useEffect(() => {
+   158→    if (!isMobile) {
+   159→      const timer = setInterval(() => {
+   160→        setActiveSvg((prev) => (prev === 0 ? 1 : 0));
+   161→      }, 2500);
+   162→      return () => clearInterval(timer);
+   163→    }
+   164→  }, [isMobile]);
+   165→
+   166→  const triggerFullscreen = () => {
+   167→    if (document.documentElement.requestFullscreen) {
+   168→      document.documentElement.requestFullscreen().catch((err) => {
+   169→        console.log("Error attempting to enable fullscreen:", err);
+   170→      });
+   171→    }
+   172→  };
+   173→
+   174→  // Handle keypresses for Unlock (Enter) or Escape to go back
+   175→  useEffect(() => {
+   176→    const handleKeyDown = (e) => {
+   177→      if (!showPasswordInput) {
+   178→        if (e.key === "Enter" || e.key === " ") {
+   179→          triggerFullscreen();
+   180→          setShowPasswordInput(true);
+   181→        }
+   182→      } else {
+   183→        if (e.key === "Escape") {
+   184→          setShowPasswordInput(false);
+   185→          setPassword("");
+   186→        } else if (!isMobile) {
+   187→          // Keyboard entry for passcode on mobile or desktop password
+   188→        }
+   189→      }
+   190→    };
+   191→    window.addEventListener("keydown", handleKeyDown);
+   192→    return () => window.removeEventListener("keydown", handleKeyDown);
+   193→  }, [showPasswordInput, isMobile]);
+   194→
+   195→  const handleShutDown = () => {
+   196→    setIsShuttingDown(true);
+   197→    setTimeout(() => {
+   198→      window.location.href = "about:blank";
+   199→    }, 2000);
+   200→  };
+   201→
+   202→  const handleLogin = (e) => {
+   203→    if (e) e.preventDefault();
+   204→    triggerFullscreen();
+   205→    const currentYear = new Date().getFullYear().toString();
+   206→    if (password === currentYear) {
+   207→      onLogin();
+   208→    } else {
+   209→      setError(true);
+   210→      setPassword("");
+   211→      setTimeout(() => setError(false), 500);
+   212→    }
+   213→  };
+   214→
+   215→  // Custom keypads for iOS
+   216→  const handleKeypadPress = (num) => {
+   217→    triggerFullscreen();
+   218→    if (password.length < 4) {
+   219→      const nextPass = password + num;
+   220→      setPassword(nextPass);
+   221→
+   222→      // Auto-unlock if 4 digits are completed
+   223→      if (nextPass.length === 4) {
+   224→        const currentYear = new Date().getFullYear().toString();
+   225→        if (nextPass === currentYear) {
+   226→          setTimeout(() => {
+   227→            onLogin();
+   228→          }, 150);
+   229→        } else {
+   230→          setTimeout(() => {
+   231→            setError(true);
+   232→            setTimeout(() => {
+   233→              setPassword("");
+   234→              setError(false);
+   235→            }, 500);
+   236→          }, 150);
+   237→        }
+   238→      }
+   239→    }
+   240→  };
+   241→
+   242→  const handleBackspace = () => {
+   243→    triggerFullscreen();
+   244→    setPassword((prev) => prev.slice(0, -1));
+   245→  };
+   246→
+   247→  // iOS 17 Lock Screen (Mobile Version)
+   248→  if (isMobile) {
+   249→    return (
+   250→      <div
+   251→        className="fixed inset-0 z-50 flex flex-col items-center justify-between text-white select-none overflow-hidden"
+   252→        style={{
+   253→          backgroundImage: "url('/wallpapers/mobile/mobile-wallpaper.webp')",
+   254→          backgroundSize: "cover",
+   255→          backgroundPosition: "center",
+   256→        }}
+   257→        onClick={() => {
+   258→          if (!showPasswordInput && !showCameraView) {
+   259→            triggerFullscreen();
+   260→            setShowPasswordInput(true);
+   261→          }
+   262→        }}
+   263→      >
+   264→        {/* Dynamic abstract wallpaper patterns */}
+   265→        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-purple-900/30 via-transparent to-transparent pointer-events-none z-0" />
+   266→        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-900/40 via-transparent to-transparent pointer-events-none z-0" />
+   267→
+   268→        {/* Flashlight screen effect */}
+   269→        {flashlightActive && (
+   270→          <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px] pointer-events-none z-10 transition-opacity duration-300" />
+   271→        )}
+   272→
+   273→        <style>{`
+   274→          @keyframes shake {
+   275→            0%, 100% { transform: translateX(0); }
+   276→            20%, 60% { transform: translateX(-8px); }
+   277→            40%, 80% { transform: translateX(8px); }
+   278→          }
+   279→          .shake-animation {
+   280→            animation: shake 0.4s ease-in-out;
+   281→          }
+   282→        `}</style>
+   283→
+   284→        {/* Dynamic Island cutout at the very top */}
+   285→        <div className="w-28 h-[26px] bg-[#0a0a0a] rounded-full border border-neutral-900 flex items-center justify-between px-3.5 mt-3 shadow-lg z-20">
+   286→          {/* FaceID Sensor / TrueDepth Array */}
+   287→          <div className="w-2.5 h-2.5 rounded-full bg-[#080808] border border-neutral-950 flex-shrink-0" />
+   288→          {/* Front Camera Lens with blue AR glass element reflection */}
+   289→          <div className="w-3.5 h-3.5 rounded-full bg-[#030307] border border-[#1a1a24] shadow-inner flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+   290→            <div className="w-1.5 h-1.5 rounded-full bg-[#0d2d4d] opacity-90 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] flex items-center justify-center">
+   291→              <div className="w-0.5 h-0.5 rounded-full bg-cyan-400 opacity-60" />
+   292→            </div>
+   293→          </div>
+   294→        </div>
+   295→
+   296→        {!showPasswordInput ? (
+   297→          /* iOS 17 Lock Screen Phase */
+   298→          <div className="flex flex-col items-center justify-between h-full w-full px-6 py-8 z-10 animate-in fade-in zoom-in-95 duration-300">
+   299→            {/* Top Lock status, date, and clock */}
+   300→            <div className="flex flex-col items-center mt-8">
+   301→              <div className="flex items-center gap-1 opacity-80 mb-2">
+   302→                <Lock className="w-3.5 h-3.5 text-white" />
+   303→                <span className="text-[10px] font-bold tracking-widest uppercase">Locked</span>
+   304→              </div>
+   305→              <p className="text-white/80 text-sm font-semibold tracking-wide drop-shadow-md">
+   306→                {dateStr}
+   307→              </p>
+   308→              <h1 className="text-white text-8xl font-semibold tracking-tighter drop-shadow-lg mt-0.5">
+   309→                {time}
+   310→              </h1>
+   311→            </div>
+   312→
+   313→            {/* Notification preview (iOS Widget style) */}
+   314→            <div className="w-full max-w-sm bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl p-4 flex gap-3.5 shadow-xl animate-bounce duration-[3000ms] mt-10">
+   315→              <img
+   316→                src="/contacts/avatars/kuldeep.webp"
+   317→                alt="Profile Avatar"
+   318→                className="w-10 h-10 rounded-xl object-cover border border-white/10 shadow-sm shrink-0"
+   319→              />
+   320→              <div className="flex-1 min-w-0">
+   321→                <div className="flex justify-between items-baseline">
+   322→                  <span className="text-xs font-bold text-white leading-tight">Welcome</span>
+   323→                  <span className="text-[9px] text-white/50 font-medium">now</span>
+   324→                </div>
+   325→                <p className="text-[11px] text-white/95 leading-normal mt-0.5 truncate font-semibold">
+   326→                  Kuldeep rajput's Portfolio
+   327→                </p>
+   328→                <p className="text-[10px] text-white/60 leading-normal truncate">
+   329→                  Swipe up or Tap to view portfolio. Passcode is {new Date().getFullYear()}.
+   330→                </p>
+   331→              </div>
+   332→            </div>
+   333→
+   334→            {/* Bottom Actions & Home Swipe Line */}
+   335→            <div className="w-full max-w-sm flex flex-col items-center gap-6 mt-auto">
+   336→              <div className="flex justify-between w-full px-4">
+   337→                {/* Flashlight button */}
+   338→                <button
+   339→                  onClick={async (e) => {
+   340→                    e.stopPropagation();
+   341→                    const nextActive = !flashlightActive;
+   342→                    setFlashlightActive(nextActive);
+   343→                    await togglePhysicalTorch(nextActive);
+   344→                  }}
+   345→                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+   346→                    flashlightActive
+   347→                      ? "bg-white text-black shadow-lg shadow-white/20"
+   348→                      : "bg-white/10 hover:bg-white/20 text-white border border-white/5"
+   349→                  }`}
+   350→                >
+   351→                  <svg
+   352→                    viewBox="0 0 24 24"
+   353→                    width="18"
+   354→                    height="18"
+   355→                    fill="none"
+   356→                    stroke="currentColor"
+   357→                    strokeWidth="2.5"
+   358→                  >
+   359→                    <path d="M18 6c0-2.2-1.8-4-4-4h-4C7.8 2 6 3.8 6 6v4c0 .6.4 1.2 1 1.4L9 12.3V19c0 1.7 1.3 3 3 3s3-1.3 3-3v-6.7l2-1c.6-.2 1-.8 1-1.4V6z" />
+   360→                    <path d="M9 7h6M9 10h6" />
+   361→                  </svg>
+   362→                </button>
+   363→
+   364→                {/* Home Swipe Text Indicator */}
+   365→                <div className="flex flex-col items-center justify-center opacity-70">
+   366→                  <span className="text-[11px] font-bold tracking-wider text-white uppercase animate-pulse">
+   367→                    Tap to unlock
+   368→                  </span>
+   369→                </div>
+   370→
+   371→                {/* Camera placeholder button */}
+   372→                <button
+   373→                  onClick={(e) => {
+   374→                    e.stopPropagation();
+   375→                    startCamera();
+   376→                  }}
+   377→                  className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/5 flex items-center justify-center transition-colors cursor-pointer text-white"
+   378→                >
+   379→                  <Camera className="w-4.5 h-4.5" strokeWidth={2.5} />
+   380→                </button>
+   381→              </div>
+   382→
+   383→              {/* iOS Home Indicator Bar */}
+   384→              <div className="w-32 h-1 bg-white/80 rounded-full mb-1 shadow-sm" />
+   385→            </div>
+   386→          </div>
+   387→        ) : (
+   388→          /* iOS 17 Passcode Keypad Phase */
+   389→          <div className="flex flex-col items-center justify-between h-full w-full px-6 py-8 z-10 animate-in fade-in duration-300">
+   390→            {/* Back button */}
+   391→            <button
+   392→              onClick={(e) => {
+   393→                e.stopPropagation();
+   394→                setShowPasswordInput(false);
+   395→                setPassword("");
+   396→              }}
+   397→              className="self-start mt-6 flex items-center gap-1 bg-white/5 border border-white/5 rounded-full px-3 py-1.5 text-[11px] text-white/80 transition-all cursor-pointer active:bg-white/15"
+   398→            >
+   399→              <ChevronLeft className="w-3 h-3" />
+   400→              <span>Cancel</span>
+   401→            </button>
+   402→
+   403→            {/* Lock / Header Section */}
+   404→            <div className="flex flex-col items-center mt-3">
+   405→              <Lock className="w-4.5 h-4.5 text-white/90 mb-3" />
+   406→              <h2 className="text-[15px] font-bold tracking-wide text-white">Enter Passcode</h2>
+   407→              <p className="text-[10px] text-white/40 font-semibold mt-1">
+   408→                Passcode is the current year (e.g. {new Date().getFullYear()})
+   409→              </p>
+   410→            </div>
+   411→
+   412→            {/* Passcode dots with optional shake on error */}
+   413→            <div className={error ? "shake-animation" : ""}>
+   414→              <div className="flex gap-4 my-8 justify-center">
+   415→                {[...Array(4)].map((_, i) => (
+   416→                  <div
+   417→                    key={i}
+   418→                    className={`w-3.5 h-3.5 rounded-full border border-white transition-all duration-150 ${
+   419→                      password.length > i ? "bg-white scale-110" : "bg-transparent"
+   420→                    }`}
+   421→                  />
+   422→                ))}
+   423→              </div>
+   424→            </div>
+   425→
+   426→            {/* Interactive Keypad */}
+   427→            <div
+   428→              className="w-full max-w-[280px] mx-auto mb-12"
+   429→              onClick={(e) => e.stopPropagation()}
+   430→            >
+   431→              <div className="grid grid-cols-3 gap-y-4 gap-x-6 justify-items-center">
+   432→                {[
+   433→                  { num: "1", letters: "" },
+   434→                  { num: "2", letters: "A B C" },
+   435→                  { num: "3", letters: "D E F" },
+   436→                  { num: "4", letters: "G H I" },
+   437→                  { num: "5", letters: "J K L" },
+   438→                  { num: "6", letters: "M N O" },
+   439→                  { num: "7", letters: "P Q R S" },
+   440→                  { num: "8", letters: "T U V" },
+   441→                  { num: "9", letters: "W X Y Z" },
+   442→                ].map((key) => (
+   443→                  <button
+   444→                    key={key.num}
+   445→                    onClick={() => handleKeypadPress(key.num)}
+   446→                    className="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 backdrop-blur-md flex flex-col items-center justify-center transition-colors border border-white/5 shadow-md cursor-pointer"
+   447→                  >
+   448→                    <span className="text-2xl font-semibold text-white">{key.num}</span>
+   449→                    {key.letters && (
+   450→                      <span className="text-[7px] text-white/50 tracking-widest font-bold mt-0.5">
+   451→                        {key.letters}
+   452→                      </span>
+   453→                    )}
+   454→                  </button>
+   455→                ))}
+   456→
+   457→                {/* Cancel button */}
+   458→                <button
+   459→                  onClick={() => {
+   460→                    setShowPasswordInput(false);
+   461→                    setPassword("");
+   462→                  }}
+   463→                  className="w-16 h-16 rounded-full flex items-center justify-center text-xs font-semibold text-white/80 active:opacity-60 cursor-pointer"
+   464→                >
+   465→                  Cancel
+   466→                </button>
+   467→
+   468→                {/* 0 Key */}
+   469→                <button
+   470→                  onClick={() => handleKeypadPress("0")}
+   471→                  className="w-16 h-16 rounded-full bg-white/10 active:bg-white/30 backdrop-blur-md flex flex-col items-center justify-center transition-colors border border-white/5 shadow-md cursor-pointer"
+   472→                >
+   473→                  <span className="text-2xl font-semibold text-white">0</span>
+   474→                </button>
+   475→
+   476→                {/* Delete / Backspace */}
+   477→                <button
+   478→                  onClick={handleBackspace}
+   479→                  className="w-16 h-16 rounded-full flex items-center justify-center text-xs font-semibold text-white/80 active:opacity-60 cursor-pointer"
+   480→                >
+   481→                  Delete
+   482→                </button>
+   483→              </div>
+   484→            </div>
+   485→          </div>
+   486→        )}
+   487→
+   488→        {/* Camera modal view overlay */}
+   489→        {showCameraView && (
+   490→          <div
+   491→            className="absolute inset-0 bg-black z-[120] flex flex-col justify-between py-6 px-4 animate-in fade-in duration-300"
+   492→            onClick={(e) => e.stopPropagation()}
+   493→          >
+   494→            {/* Top Bar controls */}
+   495→            <div className="flex justify-between items-center z-[130] mt-6">
+   496→              <button
+   497→                onClick={(e) => {
+   498→                  e.stopPropagation();
+   499→                  stopCamera();
+   500→                }}
+   501→                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/5 active:bg-white/20 transition-all cursor-pointer text-white"
+   502→              >
+   503→                <ChevronLeft className="w-5 h-5" />
+   504→              </button>
+   505→
+   506→              <div className="bg-black/40 border border-white/5 rounded-full px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/85 select-none">
+   507→                Live Filter: {activeFilter}
+   508→              </div>
+   509→
+   510→              <div className="w-10 h-10 opacity-0 pointer-events-none" />
+   511→            </div>
+   512→
+   513→            {/* Video preview with live CSS filter / Mock preview fallback */}
+   514→            <div className="absolute inset-0 flex items-center justify-center z-10 bg-black">
+   515→              {cameraStream ? (
+   516→                <video
+   517→                  id="lockscreen-camera-video"
+   518→                  autoPlay
+   519→                  playsInline
+   520→                  muted
+   521→                  className="w-full h-full object-cover transition-all duration-300"
+   522→                  style={{
+   523→                    filter:
+   524→                      activeFilter === "mono"
+   525→                        ? "grayscale(1)"
+   526→                        : activeFilter === "noir"
+   527→                          ? "contrast(1.4) grayscale(1)"
+   528→                          : activeFilter === "vivid"
+   529→                            ? "saturate(1.8)"
+   530→                            : "none",
+   531→                    transform: "scaleX(-1)", // mirror for front camera feel
+   532→                  }}
+   533→                />
+   534→              ) : (
+   535→                <div className="w-full h-full flex flex-col items-center justify-center relative bg-neutral-950">
+   536→                  <img
+   537→                    src="/contacts/avatars/kuldeep.webp"
+   538→                    alt="Mock viewfinder"
+   539→                    className="w-full h-full object-cover opacity-50 transition-all duration-300"
+   540→                    style={{
+   541→                      filter:
+   542→                        activeFilter === "mono"
+   543→                          ? "grayscale(1)"
+   544→                          : activeFilter === "noir"
+   545→                            ? "contrast(1.4) grayscale(1)"
+   546→                            : activeFilter === "vivid"
+   547→                              ? "saturate(1.8)"
+   548→                              : "none",
+   549→                    }}
+   550→                  />
+   551→                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 pointer-events-none p-6 text-center">
+   552→                    <span className="text-[10px] font-bold text-white/60 tracking-widest uppercase bg-black/60 px-4 py-2 rounded-full border border-white/5 shadow-lg">
+   553→                      Preview Mode (HTTP/Non-Secure)
+   554→                    </span>
+   555→                  </div>
+   556→                </div>
+   557→              )}
+   558→            </div>
+   559→
+   560→            {/* Visual flash effect */}
+   561→            {shutterFlash && (
+   562→              <div className="absolute inset-0 bg-white z-[999] pointer-events-none transition-opacity duration-300" />
+   563→            )}
+   564→
+   565→            {/* Bottom Controls */}
+   566→            <div className="flex justify-between items-center px-6 mb-8 z-[130]">
+   567→              {/* Filter toggle button */}
+   568→              <button
+   569→                onClick={(e) => {
+   570→                  e.stopPropagation();
+   571→                  const filters = ["normal", "mono", "noir", "vivid"];
+   572→                  const idx = filters.indexOf(activeFilter);
+   573→                  const nextFilter = filters[(idx + 1) % filters.length];
+   574→                  setActiveFilter(nextFilter);
+   575→                }}
+   576→                className="w-12 h-12 rounded-full bg-white/10 border border-white/5 flex items-center justify-center text-white active:bg-white/20 transition-colors cursor-pointer"
+   577→              >
+   578→                <svg
+   579→                  viewBox="0 0 24 24"
+   580→                  width="18"
+   581→                  height="18"
+   582→                  fill="none"
+   583→                  stroke="currentColor"
+   584→                  strokeWidth="2.2"
+   585→                >
+   586→                  <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2v16a8 8 0 0 0 0-16z" />
+   587→                </svg>
+   588→              </button>
+   589→
+   590→              {/* Shutter button */}
+   591→              <button
+   592→                onClick={(e) => {
+   593→                  e.stopPropagation();
+   594→                  takePhoto();
+   595→                }}
+   596→                className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-transparent active:scale-95 transition-all cursor-pointer"
+   597→              >
+   598→                <div className="w-16 h-16 rounded-full bg-white active:bg-neutral-250 transition-colors" />
+   599→              </button>
+   600→
+   601→              {/* Camera flip mock / placeholder */}
+   602→              <button
+   603→                onClick={(e) => {
+   604→                  e.stopPropagation();
+   605→                }}
+   606→                className="w-12 h-12 rounded-full bg-white/10 border border-white/5 flex items-center justify-center text-white active:bg-white/20 transition-colors cursor-pointer"
+   607→              >
+   608→                <svg
+   609→                  viewBox="0 0 24 24"
+   610→                  width="18"
+   611→                  height="18"
+   612→                  fill="none"
+   613→                  stroke="currentColor"
+   614→                  strokeWidth="2.2"
+   615→                >
+   616→                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+   617→                </svg>
+   618→              </button>
+   619→            </div>
+   620→          </div>
+   621→        )}
+   622→      </div>
+   623→    );
+   624→  }
+   625→
+   626→  // Classic Desktop Lock/Login Screen (macOS style)
+   627→  return (
+   628→    <>
+   629→      {isAsleep && (
+   630→        <div
+   631→          className="fixed inset-0 z-[999999] bg-black cursor-pointer"
+   632→          onClick={() => setIsAsleep(false)}
+   633→        ></div>
+   634→      )}
+   635→
+   636→      {isShuttingDown && (
+   637→        <div className="fixed inset-0 bg-black z-[9999999] flex flex-col items-center justify-center select-none cursor-none">
+   638→          <img
+   639→            src="/system/icons/apple/appleLogo.svg"
+   640→            alt="Apple Logo"
+   641→            className="w-14 h-14 invert dark:invert-0 opacity-95 animate-pulse mb-8"
+   642→          />
+   643→          <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+   644→        </div>
+   645→      )}
+   646→
+   647→      {/* Styles for shake and smooth SVG drawing */}
+   648→      <style>{`
+   649→        @keyframes shake {
+   650→          0%, 100% { transform: translateX(0); }
+   651→          20%, 60% { transform: translateX(-8px); }
+   652→          40%, 80% { transform: translateX(8px); }
+   653→        }
+   654→        .shake-animation {
+   655→          animation: shake 0.4s ease-in-out;
+   656→        }
+   657→
+   658→        @keyframes drawSvgPathNamaste {
+   659→          0% {
+   660→            stroke-dashoffset: 3462.72;
+   661→            opacity: 0;
+   662→          }
+   663→          10% {
+   664→            opacity: 1;
+   665→          }
+   666→          90% {
+   667→            stroke-dashoffset: 0;
+   668→            opacity: 1;
+   669→          }
+   670→          100% {
+   671→            stroke-dashoffset: 0;
+   672→            opacity: 0;
+   673→          }
+   674→        }
+   675→        .svg-drawing-path-namaste {
+   676→          stroke-dasharray: 3462.72;
+   677→          stroke-dashoffset: 3462.72;
+   678→          animation: drawSvgPathNamaste 2.5s ease-in-out forwards;
+   679→        }
+   680→
+   681→        @keyframes drawSvgPathHello {
+   682→          0% {
+   683→            stroke-dashoffset: -2000;
+   684→            opacity: 0;
+   685→          }
+   686→          10% {
+   687→            opacity: 1;
+   688→          }
+   689→          90% {
+   690→            stroke-dashoffset: 0;
+   691→            opacity: 1;
+   692→          }
+   693→          100% {
+   694→            stroke-dashoffset: 0;
+   695→            opacity: 0;
+   696→          }
+   697→        }
+   698→        .svg-drawing-path-hello {
+   699→          stroke-dasharray: 2000;
+   700→          stroke-dashoffset: -2000;
+   701→          animation: drawSvgPathHello 2.5s ease-in-out forwards;
+   702→        }
+   703→      `}</style>
+   704→
+   705→      <div
+   706→        className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-black/10 backdrop-blur-lg select-none py-12 px-6"
+   707→        onClick={() => {
+   708→          if (!showPasswordInput) {
+   709→            triggerFullscreen();
+   710→            setShowPasswordInput(true);
+   711→          }
+   712→        }}
+   713→      >
+   714→        {!showPasswordInput ? (
+   715→          /* Lock Screen Phase */
+   716→          <div className="flex flex-col items-center justify-between h-full w-full max-w-lg text-white">
+   717→            {/* Top Lock and Date/Time */}
+   718→            <div className="flex flex-col items-center mt-6">
+   719→              <Lock className="w-5 h-5 text-white/90 mb-3" />
+   720→              <p className="text-white/90 text-lg font-medium tracking-wide drop-shadow-md">
+   721→                {dateStr}
+   722→              </p>
+   723→              <h1 className="text-white text-7xl sm:text-8xl font-light tracking-tighter drop-shadow-lg mt-1 select-text">
+   724→                {time}
+   725→              </h1>
+   726→            </div>
+   727→
+   728→            {/* Central Animated SVG Greeting */}
+   729→            <div className="flex-1 flex items-center justify-center py-10 w-full max-w-xl px-4 overflow-hidden">
+   730→              {activeSvg === 0 ? (
+   731→                /* Namaste SVG */
+   732→                <svg
+   733→                  key="namaste"
+   734→                  viewBox="0 0 786 331"
+   735→                  className="w-full h-auto drop-shadow-[0_8px_24px_rgba(255,255,255,0.2)]"
+   736→                >
+   737→                  <path
+   738→                    d="M152.163 130.821C155.884 171.241 155.392 193.902 152.163 234.321M151.663 303.824C155.663 354.324 147.329 268.298 152.163 234.321M152.163 234.321C108.727 198.737 83.1502 190.409 60.663 193.324M60.663 193.324C32.0982 193.351 29.5781 200.382 22.6628 217.324C19.4228 234.668 22.5001 240.864 33.6628 247.824C45.9487 254.637 53.3756 255.923 67.6628 253.324C75.2641 250.491 79.8886 245.664 82.163 225.324C82.3946 204.561 77.6677 199.437 60.663 193.324ZM263.663 128.824C269.565 162.487 269.176 180.577 263.663 211.824C261.738 228.106 257.035 239.784 242.663 264.824C229.588 281.175 198.205 273.237 196.663 245.824C195.678 228.313 210.163 214.824 210.163 214.824C210.163 214.824 220.663 205.324 249.663 205.324C278.663 205.324 342.219 234.321 342.219 234.321L343.295 130.565C345.972 129.913 338.626 371.48 339.663 307.824M453.663 130.684C498.393 145.245 516.058 159.254 529.663 178.324C546.163 200.324 527.578 241.7 495.163 257.824M495.163 257.824C495.163 257.824 441.163 261.824 417.663 245.824C394.163 229.824 405.163 207.324 417.663 200.324C430.163 193.324 465.793 204.292 484.163 237.824C484.163 237.824 514.162 312.824 517.162 319.324C520.163 325.824 495.163 257.824 495.163 257.824ZM535.162 229.824C570.663 242.324 633.664 247.324 613.163 234.824M722.163 304.324C721.186 251.842 719.663 129.436 719.663 129.436C712.603 90.5507 700.11 46.8239 700.663 60.8239M722.163 304.324C722.163 252.824 720.499 356.062 722.163 304.324ZM722.163 304.324C720.849 254.412 696.918 197.632 663.663 202.824C630.408 208.015 621.888 223.105 617.163 238.824C609.368 268.718 649.663 353.324 628.663 303.324M22.6629 128.824C-110.337 133.324 887.663 129.436 769.163 129.436M700.663 60.8239C699.163 22.8238 625.163 -1.17599 613.163 16.324C601.163 33.8239 623.055 46.5272 640.163 55.324C657.271 64.1207 687.163 83.3239 700.663 60.8239Z"
+   739→                    stroke="white"
+   740→                    strokeWidth="21"
+   741→                    fill="none"
+   742→                    strokeLinecap="round"
+   743→                    strokeLinejoin="round"
+   744→                    className="svg-drawing-path-namaste"
+   745→                  />
+   746→                </svg>
+   747→              ) : (
+   748→                /* Hello SVG */
+   749→                <svg
+   750→                  key="hello"
+   751→                  viewBox="0 0 512 342"
+   752→                  className="w-full h-auto drop-shadow-[0_8px_24px_rgba(255,255,255,0.2)]"
+   753→                >
+   754→                  <g transform="translate(256, 171)">
+   755→                    <path
+   756→                      d="M210.25,1.907C191.75,22.382,184.25,11.881,159.25,2.516C122.234,-11.35,101.515,58.907,144.75,58.907C174.25,58.907,187.75,0.881,149.25,0.881C116.016,0.881,121.25,58.907,88.25,58.907C26.064,58.907,62.25,-63.593,88.25,-63.593C117.75,-63.593,82.75,58.907,31.75,58.907C-19.25,58.907,3.75,-63.593,29.75,-63.593C59.75,-63.593,33.25,58.907,-27.75,58.907C-69.25,58.907,-65.75,1.907,-36.25,1.907C-6.75,1.907,-62.313,81.381,-92.25,61.381C-110.25,49.356,-80.25,1.907,-111.25,1.907C-142.25,1.907,-143.25,51.286,-145.25,66.119C-137.25,-44.119,-125.75,-66.119,-107.75,-66.119C-89.75,-66.119,-94.275,-37.834,-107.75,-19.119C-129.258,10.754,-153.75,32.381,-210.25,47.881"
+   757→                      stroke="white"
+   758→                      strokeWidth="9"
+   759→                      fill="none"
+   760→                      strokeLinecap="round"
+   761→                      strokeLinejoin="round"
+   762→                      className="svg-drawing-path-hello"
+   763→                    />
+   764→                  </g>
+   765→                </svg>
+   766→              )}
+   767→            </div>
+   768→
+   769→            {/* Bottom Profile and Prompt */}
+   770→            <div className="flex flex-col items-center gap-4">
+   771→              <img
+   772→                src="/contacts/avatars/kuldeep.webp"
+   773→                alt="Profile Avatar"
+   774→                className="w-10 h-10 rounded-full object-cover border border-white/20 shadow-md"
+   775→              />
+   776→              <div className="text-center">
+   777→                <p className="text-white/80 text-sm font-medium tracking-wide drop-shadow-sm animate-pulse">
+   778→                  Press Enter or Click to continue
+   779→                </p>
+   780→                <div className="flex items-center justify-center gap-1.5 mt-2 text-white/50 text-[11px]">
+   781→                  <span>Press</span>
+   782→                  <span className="bg-white/10 px-1.5 py-0.5 rounded border border-white/15 text-[10px] font-mono">
+   783→                    F11
+   784→                  </span>
+   785→                  <span>for Full Screen</span>
+   786→                </div>
+   787→              </div>
+   788→            </div>
+   789→          </div>
+   790→        ) : (
+   791→          /* Password Screen Phase */
+   792→          <div className="flex flex-col items-center justify-between h-full w-full text-white">
+   793→            {/* Back Button to Lock Screen */}
+   794→            <button
+   795→              onClick={(e) => {
+   796→                e.stopPropagation();
+   797→                setShowPasswordInput(false);
+   798→                setPassword("");
+   799→              }}
+   800→              className="absolute top-8 left-8 flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/20 rounded-full px-3.5 py-1.5 text-xs text-white transition-all cursor-pointer"
+   801→            >
+   802→              <ChevronLeft className="w-3.5 h-3.5" />
+   803→              <span>Back</span>
+   804→            </button>
+   805→
+   806→            {/* Main Form Center */}
+   807→            <div className="flex-1 flex flex-col items-center justify-center mt-[-4vh]">
+   808→              <div className={error ? "shake-animation" : ""}>
+   809→                <div className="flex flex-col items-center">
+   810→                  <img
+   811→                    src="/contacts/avatars/kuldeep.webp"
+   812→                    alt="User Profile"
+   813→                    className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover shadow-lg border-2 border-white/20 mb-4"
+   814→                  />
+   815→                  <h1 className="text-white text-2xl font-medium tracking-wide mb-6 drop-shadow-md">
+   816→                    Kuldeep rajput
+   817→                  </h1>
+   818→
+   819→                  <form
+   820→                    onSubmit={handleLogin}
+   821→                    onClick={(e) => e.stopPropagation()}
+   822→                    className="relative flex items-center group w-48"
+   823→                  >
+   824→                    <input
+   825→                      type="password"
+   826→                      placeholder="Enter Password"
+   827→                      value={password}
+   828→                      onChange={(e) => setPassword(e.target.value)}
+   829→                      autoFocus
+   830→                      className="w-full bg-white/20 hover:bg-white/30 focus:bg-white/30 backdrop-blur-md text-white placeholder-white/60 rounded-full py-1.5 px-4 pr-10 outline-none text-sm font-medium transition-colors border border-white/10 focus:border-white/30"
+   831→                    />
+   832→                    <button
+   833→                      type="submit"
+   834→                      className="absolute right-1 w-6 h-6 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center transition-colors border border-white/20 cursor-pointer"
+   835→                    >
+   836→                      <ArrowRight className="text-white w-3.5 h-3.5" strokeWidth={3} />
+   837→                    </button>
+   838→                  </form>
+   839→                  <p className="text-white/60 text-xs mt-3 font-medium drop-shadow-sm">
+   840→                    Password is current year (e.g. {new Date().getFullYear()})
+   841→                  </p>
+   842→                </div>
+   843→              </div>
+   844→            </div>
+   845→
+   846→            {/* Bottom Power Controls */}
+   847→            <div className="flex gap-10 mt-auto" onClick={(e) => e.stopPropagation()}>
+   848→              <button
+   849→                className="flex flex-col items-center gap-2 group outline-none cursor-pointer"
+   850→                onClick={() => setIsAsleep(true)}
+   851→              >
+   852→                <div className="w-10 h-10 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-colors border border-white/10">
+   853→                  <Moon className="text-white w-4 h-4" />
+   854→                </div>
+   855→                <span className="text-white text-xs font-medium drop-shadow-md">Sleep</span>
+   856→              </button>
+   857→              <button
+   858→                className="flex flex-col items-center gap-2 group outline-none cursor-pointer"
+   859→                onClick={() => {
+   860→                  sessionStorage.setItem("isRestartingSystem", "true");
+   861→                  window.location.reload();
+   862→                }}
+   863→              >
+   864→                <div className="w-10 h-10 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-colors border border-white/10">
+   865→                  <RotateCcw className="text-white w-4 h-4" />
+   866→                </div>
+   867→                <span className="text-white text-xs font-medium drop-shadow-md">Restart</span>
+   868→              </button>
+   869→              <button
+   870→                className="flex flex-col items-center gap-2 group outline-none cursor-pointer"
+   871→                onClick={handleShutDown}
+   872→              >
+   873→                <div className="w-10 h-10 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center transition-colors border border-white/10">
+   874→                  <Power className="text-white w-4 h-4" />
+   875→                </div>
+   876→                <span className="text-white text-xs font-medium drop-shadow-md">Shut Down</span>
+   877→              </button>
+   878→            </div>
+   879→          </div>
+   880→        )}
+   881→      </div>
+   882→    </>
+   883→  );
+   884→};
+   885→
+   886→export default LoginScreen;
+   887→
