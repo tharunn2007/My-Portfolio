@@ -39,6 +39,10 @@
 
   #window-header {
     @apply flex items-center justify-between px-4 py-3 rounded-t-lg bg-gray-50 border-b border-gray-200 select-none text-sm text-gray-400;
+
+    /* Subtle liquid-glass specular hairline on the titlebar (readability-safe:
+       the surface stays opaque, only a 1px inner top light is added). */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
   }
 }
 

@@ -263,3 +263,22 @@ Stage Summary:
 - Desktop = one animated signature wallpaper + 6-icon portfolio-first dock; all apps still reachable via Launchpad/Siri; mobile untouched.
 - Installable zip is 12.32MB, reset-resilient in upload/portfolio-backup-r23.zip, served at /portfolio-template.zip.
 - Still pending user data: X/Twitter, domain, phone, real skills, avatar, resume, project screenshots, gallery.
+
+---
+Task ID: 24
+Agent: Z.ai Code (main)
+Task: Dark mode everywhere, Liquid Glass floating UI (24-a agent), GitHub heatmap widget replacing calendar, Claude-Code-style THARUNN banner, playable `flappy` CLI game (desktop + mobile).
+
+Work Log:
+- 24-a (frontend-styling-expert agent, completed but timed out before worklog — work verified by main): created src/styles/dark-theme.css (486 lines, imported in index.css) darkening Settings/Safari/Finder/Terminal/Notes/Photos/resume/txtfile/imgfile + About modals + window chrome under body.theme-dark (dark default); liquid-glass recipe (blur 36px saturate 190%, specular inset highlights) applied to dock-container, dock tooltips, context menus, widget menu, navbar panels, notch island; MobileOS darkMode default flipped to true. Main agent verified: lint 0 errors, forbidden files untouched.
+- CASCADE FIX (main): window headers using Tailwind v4 important utilities (!bg-[#eef1f5], bg-[#f3f3f3]!, !bg-[#f5f5f5] in Safari/Settings/Photos chrome) resisted unlayered !important overrides because per CSS cascade spec layered !important BEATS unlayered !important. Appended @layer utilities block to dark-theme.css re-darkening those 4 utility classes + toolbar inputs. Verified: #safari #window-header computed = rgb(22,22,24). KEY LESSON for future: dark overrides that fight `!`-utilities must live in @layer utilities.
+- terminalBanner.js rewritten: buildClaudeBanner() renders layered poster-style banner (bright orange fill #f2642c + 2 offset hollow-outline layers #b04e16/#70260e computed from glyph perimeter), bannerWelcomeLines() Claude-style "✳ Welcome" pill; buildBlockBanner kept as narrow-terminal fallback; bannerColumns widened for offsets.
+- Desktop TerminalInput.jsx: xterm theme -> dark (#161618 bg, #f2642c cursor, #d4d4d8 fg, rust selection), container bg-[#161618]; new banner + welcome pill (narrow fallback keeps single-layer orange); FLAPPY game: `flappy` command, 17-row playfield, gravity/flap physics, green pipes w/ 5-cell gap, orange bird, ░ ground, orange HUD (SCORE/BEST), localStorage best, GAME OVER box [R] restart [Q] quit, keyboard takeover in onData (space/w/↑ flap), cleanup on unmount + resize guard while playing. help/about updated to mention flappy.
+- Mobile TerminalInput.jsx: dark theme + dark shortcut bar; flappy command (tap terminal to flap, tap after game over to exit, flappy chip in shortcut bar, q to quit via keyboard).
+- Widgets: clock-calendar REMOVED from defaults/options (per user), new GithubHeatmapWidget — live GitHub contributions via jogruber API (verified real data: 656 contributions fetched for @tharunn2007) with seeded mulberry32 fallback (weekend-weighted), 26-week 7-row grid, temperature gradient (#27272a→#1d4ed8→#06b6d4→#84cc16→#eab308→#ef4444), month labels, glowing cells, less/more legend, whole widget links to GitHub profile; widget sizes 280-400px; legacy widget migration clock-calendar→github-heatmap. Fixed grid overflow by widening medium to 344px.
+- Verified in browser (1440x900): desktop shows heatmap widget (real data) instead of calendar; terminal dark + Claude banner + welcome pill; flappy full lifecycle (start→play→game over→R restart→space flap→Q quit→prompt restored); Settings fully dark (real GitHub API data shown: 28 repos/5 followers); Safari fully dark incl. toolbar after layer fix; liquid glass dock visible. Lint 0 errors; bun syntax sweep 554 files 0 errors.
+- Zip rebuilt: 722 files, 12.33 MB, md5 75371f8c470a1cf2f92fdc7db37cc9cc, 3 identical copies (root, public/, upload/portfolio-backup-r24.zip), 8/8 content checks PASS.
+
+Stage Summary:
+- Portfolio now dark-first everywhere + liquid glass floating UI; calendar widget replaced by live GitHub contribution heatmap (temperature gradient); terminal is Claude-Code-styled with THARUNN poster banner and a playable `flappy` game on desktop AND mobile.
+- Pending user data unchanged: X/Twitter, domain, phone, real skills, avatar, resume, project screenshots, gallery.

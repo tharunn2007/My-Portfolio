@@ -5,8 +5,187 @@ import useWidgetsStore from "@store/widgets";
 import useTimeStore from "@store/time";
 import AnalogClockFace from "./AnalogClockFace";
 import WEATHER_DATA from "@module/desktop/apps/weather/data/weatherData";
+import { GITHUB_PROFILE } from "@constants";
 import { useGSAP } from "@gsap/react";
 import { Draggable } from "gsap/Draggable";
+
+// ---------------------------------------------------------------------------
+// GitHub contribution heatmap — temperature-style cool gradient.
+// Data: live GitHub contributions (jogruber API) with a deterministic
+// seeded fallback so the widget always looks alive even offline.
+// ---------------------------------------------------------------------------
+const GITHUB_USER = (GITHUB_PROFILE || "https://github.com/tharunn2007").replace(/\/$/, "").split("/").pop() || "tharunn2007";
+
+// Temperature ramp: cold blue -> cyan -> lime -> amber -> hot red.
+const HEAT_COLORS = [
+  "#27272a", // 0 — no activity
+  "#1d4ed8", // 1 — cold blue
+  "#06b6d4", // 2 — cyan
+  "#84cc16", // 3 — lime
+  "#eab308", // 4 — amber
+  "#ef4444", // 5 — hot red
+];
+
+const HEAT_WEEKS = 26;
+
+const mulberry32 = (seed) => () => {
+  seed |= 0;
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+const seededDays = (days) => {
+  let seed = 0;
+  for (const ch of GITHUB_USER) seed = (seed * 31 + ch.charCodeAt(0)) | 0;
+  const rand = mulberry32(seed);
+  const today = new Date();
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (days - 1 - i));
+    const dow = date.getDay();
+    const r = rand();
+    const weekendFactor = dow === 0 || dow === 6 ? 0.62 : 1;
+    let level = 0;
+    if (r < 0.34 * weekendFactor) level = 0;
+    else if (r < 0.55 * weekendFactor) level = 1;
+    else if (r < 0.72 * weekendFactor) level = 2;
+    else if (r < 0.86 * weekendFactor) level = 3;
+    else if (r < 0.96) level = 4;
+    else level = 5;
+    return { date, level, count: level === 0 ? 0 : level * 2 };
+  });
+};
+
+const GithubHeatmapWidget = () => {
+  const [days, setDays] = useState(null); // null = loading
+
+  useEffect(() => {
+    let mounted = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+
+    fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USER}?y=last`, {
+      signal: controller.signal,
+    })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("api"))))
+      .then((data) => {
+        if (!mounted || !Array.isArray(data?.contributions)) return;
+        const mapped = data.contributions.slice(-HEAT_WEEKS * 7).map((c) => ({
+          date: new Date(`${c.date}T00:00:00`),
+          level: Math.min(4, c.level) === 0 ? 0 : Math.min(5, c.level + 1),
+          count: c.count || 0,
+        }));
+        if (mapped.length) setDays(mapped);
+      })
+      .catch(() => {
+        if (mounted) setDays(seededDays(HEAT_WEEKS * 7));
+      })
+      .finally(() => clearTimeout(timeout));
+
+    return () => {
+      mounted = false;
+      controller.abort();
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  const display = days ?? seededDays(HEAT_WEEKS * 7);
+  const weeks = useMemo(() => {
+    const chunks = [];
+    for (let i = 0; i < display.length; i += 7) chunks.push(display.slice(i, i + 7));
+    return chunks;
+  }, [display]);
+
+  const total = display.reduce((sum, d) => sum + d.count, 0);
+
+  // Month labels: mark the first week where each new month starts.
+  const monthLabels = useMemo(() => {
+    const labels = [];
+    let lastMonth = -1;
+    weeks.forEach((week, index) => {
+      const first = week[0]?.date;
+      if (!first) return;
+      if (first.getMonth() !== lastMonth) {
+        lastMonth = first.getMonth();
+        labels.push({ index, name: first.toLocaleDateString("en-US", { month: "short" }) });
+      }
+    });
+    return labels;
+  }, [weeks]);
+
+  const cell = 9;
+  const gap = 3;
+  const gridWidth = weeks.length * (cell + gap);
+
+  return (
+    <button
+      type="button"
+      onClick={() => window.open(GITHUB_PROFILE, "_blank", "noopener,noreferrer")}
+      className="liquid-glass flex h-full w-full flex-col rounded-2xl p-3 text-left text-white shadow-lg"
+      aria-label={`Open ${GITHUB_USER}'s GitHub profile`}
+    >
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide">
+          <span className="inline-block h-2 w-2 rounded-full bg-[#f2642c]" />
+          @{GITHUB_USER}
+        </span>
+        <span className="text-[10px] text-white/55">{total} contributions</span>
+      </div>
+
+      <div className="mt-2.5 flex-1 overflow-hidden">
+        <div className="relative" style={{ width: gridWidth }}>
+          <div className="relative mb-1 h-3">
+            {monthLabels.map(({ index, name }) => (
+              <span
+                key={`${name}-${index}`}
+                className="absolute top-0 text-[8px] font-medium text-white/45"
+                style={{ left: index * (cell + gap) }}
+              >
+                {name}
+              </span>
+            ))}
+          </div>
+          <div
+            className="grid"
+            style={{
+              gridTemplateRows: "repeat(7, 9px)",
+              gridAutoFlow: "column",
+              gridAutoColumns: "9px",
+              gap: "3px",
+            }}
+          >
+            {display.map((day, index) => (
+              <span
+                key={index}
+                title={`${day.date?.toLocaleDateString?.("en-US") ?? ""} — ${day.count} contributions`}
+                className="rounded-[2px] transition-transform hover:scale-125"
+                style={{
+                  width: `${cell}px`,
+                  height: `${cell}px`,
+                  backgroundColor: HEAT_COLORS[day.level] ?? HEAT_COLORS[0],
+                  boxShadow: day.level > 0 ? `0 0 6px ${HEAT_COLORS[day.level]}55` : "none",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-1.5 flex items-center justify-between text-[8px] text-white/45">
+        <span>last {weeks.length} weeks</span>
+        <span className="flex items-center gap-1">
+          less
+          {HEAT_COLORS.map((color) => (
+            <span key={color} className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: color }} />
+          ))}
+          more
+        </span>
+      </div>
+    </button>
+  );
+};
 
 const getCalendarDays = (year, month) => {
   const firstDay = new Date(year, month, 1).getDay();
@@ -204,6 +383,7 @@ const NotesWidget = () => {
 };
 
 const WIDGET_SIZES = {
+  "github-heatmap": { width: 344, height: 200 },
   "clock-calendar": { width: 264, height: 310 },
   clock: { width: 190, height: 130 },
   "analog-clock": { width: 200, height: 200 },
@@ -213,6 +393,11 @@ const WIDGET_SIZES = {
 };
 
 const WIDGET_SIZE_OPTIONS = {
+  "github-heatmap": {
+    small: { width: 280, height: 170 },
+    medium: { width: 344, height: 200 },
+    large: { width: 400, height: 230 },
+  },
   "clock-calendar": {
     medium: { width: 264, height: 310 },
     large: { width: 300, height: 350 },
@@ -245,6 +430,7 @@ const WIDGET_SIZE_OPTIONS = {
 };
 
 const WIDGET_LABELS = {
+  "github-heatmap": "GitHub Heatmap",
   "clock-calendar": "Time & Calendar",
   clock: "Clock",
   "analog-clock": "Analog Clock",
@@ -297,9 +483,12 @@ const WidgetContextMenu = ({ menu, onClose, onRemove, onResize, onOpen, size }) 
       style={{
         left,
         top,
-        background: "rgba(30, 30, 30, 0.82)",
-        backdropFilter: "blur(32px) saturate(180%)",
-        WebkitBackdropFilter: "blur(32px) saturate(180%)",
+        background:
+          "linear-gradient(135deg, rgba(44, 44, 48, 0.66), rgba(26, 26, 30, 0.54) 45%, rgba(38, 38, 44, 0.62))",
+        backdropFilter: "blur(36px) saturate(190%)",
+        WebkitBackdropFilter: "blur(36px) saturate(190%)",
+        boxShadow:
+          "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
       }}
       onPointerDown={(event) => event.stopPropagation()}
       onContextMenu={(event) => {
@@ -358,6 +547,7 @@ const WidgetContextMenu = ({ menu, onClose, onRemove, onResize, onOpen, size }) 
 };
 
 const WIDGET_COMPONENTS = {
+  "github-heatmap": GithubHeatmapWidget,
   "clock-calendar": ClockCalendarWidget,
   clock: ClockWidget,
   "analog-clock": AnalogClockWidget,
@@ -379,8 +569,9 @@ const DesktopWidgets = () => {
   const widgetIds = widgets.join(",");
 
   useEffect(() => {
-    if (widgets.includes("calendar")) replaceWidget("calendar", "analog-clock");
-    else if (widgets.includes("projects")) replaceWidget("projects", "analog-clock");
+    if (widgets.includes("clock-calendar")) replaceWidget("clock-calendar", "github-heatmap");
+    else if (widgets.includes("calendar")) replaceWidget("calendar", "github-heatmap");
+    else if (widgets.includes("projects")) replaceWidget("projects", "github-heatmap");
   }, [widgets, replaceWidget]);
   const isAnyWindowOpen = useMemo(
     () => Object.values(windows).some((win) => win.isOpen && !win.isMinimized),

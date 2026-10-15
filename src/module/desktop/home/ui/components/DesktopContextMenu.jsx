@@ -213,10 +213,13 @@ const DesktopContextMenu = ({
       style={{
         left: `${left}px`,
         top: `${top}px`,
-        background: "rgba(30, 30, 30, 0.72)",
-        backdropFilter: "blur(40px) saturate(210%)",
-        WebkitBackdropFilter: "blur(40px) saturate(210%)",
-        border: "1px solid rgba(255, 255, 255, 0.16)",
+        background:
+          "linear-gradient(135deg, rgba(44, 44, 48, 0.62), rgba(26, 26, 30, 0.5) 45%, rgba(38, 38, 44, 0.58))",
+        backdropFilter: "blur(36px) saturate(190%)",
+        WebkitBackdropFilter: "blur(36px) saturate(190%)",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        boxShadow:
+          "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
       }}
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
@@ -303,10 +306,13 @@ const DesktopContextMenu = ({
                   top: `${widgetSubmenuOffsetTop}px`,
                   maxHeight: `${Math.max(0, menuBottom - widgetSubmenuTop)}px`,
                   overflowY: "auto",
-                  background: "rgba(30, 30, 30, 0.85)",
-                  backdropFilter: "blur(40px) saturate(210%)",
-                  WebkitBackdropFilter: "blur(40px) saturate(210%)",
-                  border: "1px solid rgba(255, 255, 255, 0.16)",
+                  background:
+                    "linear-gradient(135deg, rgba(44, 44, 48, 0.66), rgba(26, 26, 30, 0.54) 45%, rgba(38, 38, 44, 0.62))",
+                  backdropFilter: "blur(36px) saturate(190%)",
+                  WebkitBackdropFilter: "blur(36px) saturate(190%)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  boxShadow:
+                    "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
                 }}
               >
                 <p className="px-1 pb-2 text-[11px] font-medium text-white/55">Add Widgets</p>
@@ -402,10 +408,13 @@ const DesktopContextMenu = ({
                   openSubmenuLeft ? "right-full -translate-x-1" : "left-full translate-x-1"
                 }`}
                 style={{
-                  background: "rgba(30, 30, 30, 0.85)",
-                  backdropFilter: "blur(40px) saturate(210%)",
-                  WebkitBackdropFilter: "blur(40px) saturate(210%)",
-                  border: "1px solid rgba(255, 255, 255, 0.16)",
+                  background:
+                    "linear-gradient(135deg, rgba(44, 44, 48, 0.66), rgba(26, 26, 30, 0.54) 45%, rgba(38, 38, 44, 0.62))",
+                  backdropFilter: "blur(36px) saturate(190%)",
+                  WebkitBackdropFilter: "blur(36px) saturate(190%)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  boxShadow:
+                    "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
                 }}
               >
                 {projects.map((project) => (
@@ -477,10 +486,13 @@ const DesktopContextMenu = ({
                   openSubmenuLeft ? "right-full -translate-x-1" : "left-full translate-x-1"
                 }`}
                 style={{
-                  background: "rgba(30, 30, 30, 0.85)",
-                  backdropFilter: "blur(40px) saturate(210%)",
-                  WebkitBackdropFilter: "blur(40px) saturate(210%)",
-                  border: "1px solid rgba(255, 255, 255, 0.16)",
+                  background:
+                    "linear-gradient(135deg, rgba(44, 44, 48, 0.66), rgba(26, 26, 30, 0.54) 45%, rgba(38, 38, 44, 0.62))",
+                  backdropFilter: "blur(36px) saturate(190%)",
+                  WebkitBackdropFilter: "blur(36px) saturate(190%)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  boxShadow:
+                    "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
                 }}
               >
                 {[

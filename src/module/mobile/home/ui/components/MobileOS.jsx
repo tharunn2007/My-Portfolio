@@ -17,7 +17,7 @@ const MobileOS = () => {
   const [settings, setSettings] = useState({
     wifi: true,
     bluetooth: true,
-    darkMode: false,
+    darkMode: true,
     lowPower: false,
     flashlight: false,
     airplane: false,

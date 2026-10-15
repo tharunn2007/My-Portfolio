@@ -14,8 +14,17 @@ import {
   OWNER_LOCATION,
 } from "@constants";
 import { profile } from "@constants/profile";
-import { buildBlockBanner, bannerColumns } from "@lib/terminalBanner";
+import {
+  buildClaudeBanner,
+  buildBlockBanner,
+  bannerColumns,
+  bannerWelcomeLines,
+  BANNER_COLORS,
+} from "@lib/terminalBanner";
 import useWindowsStore from "@store/window";
+
+const ANSI_RESET = "\x1b[0m";
+const orange = (text) => `\x1b[38;2;${BANNER_COLORS.fill.join(";")}m${text}${ANSI_RESET}`;
 
 const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
   const isOpen = useWindowsStore((state) => state.windows.terminal?.isOpen);
@@ -39,37 +48,18 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         t.write("\r\n" + msg + "\x1b[0m");
       };
 
-      const gradientChar = (char, tVal) => {
-        const colors = [
-          [239, 68, 68],
-          [249, 115, 22],
-          [234, 179, 8],
-        ];
-        let r, g, b;
-        if (tVal <= 0.5) {
-          const f = tVal / 0.5;
-          r = Math.round(colors[0][0] + (colors[1][0] - colors[0][0]) * f);
-          g = Math.round(colors[0][1] + (colors[1][1] - colors[0][1]) * f);
-          b = Math.round(colors[0][2] + (colors[1][2] - colors[0][2]) * f);
-        } else {
-          const f = (tVal - 0.5) / 0.5;
-          r = Math.round(colors[1][0] + (colors[2][0] - colors[1][0]) * f);
-          g = Math.round(colors[1][1] + (colors[2][1] - colors[1][1]) * f);
-          b = Math.round(colors[1][2] + (colors[2][2] - colors[1][2]) * f);
-        }
-        return `\x1b[38;2;${r};${g};${b}m${char}`;
-      };
-      const gradientLine = (str) =>
-        [...str].map((c, i, a) => gradientChar(c, a.length > 1 ? i / (a.length - 1) : 0)).join("") +
-        "\x1b[0m";
+      const claudeBanner = buildClaudeBanner(OWNER_FIRST_NAME);
+      minBannerCols = Math.max(52, bannerColumns(OWNER_FIRST_NAME));
 
-      const bannerLines = buildBlockBanner(OWNER_FIRST_NAME);
-      minBannerCols = Math.max(62, bannerColumns(OWNER_FIRST_NAME));
       printBanner = (terminal) => {
         if (terminal.cols >= minBannerCols) {
-          bannerLines.forEach((line) => terminal.writeln(gradientLine(line)));
+          bannerWelcomeLines(`Welcome to ${OWNER_FIRST_NAME}'s portfolio!`).forEach((line) =>
+            terminal.writeln(line),
+          );
+          claudeBanner.rows.forEach((line) => terminal.writeln(line));
           bannerShown = true;
         } else {
+          buildBlockBanner(OWNER_FIRST_NAME).forEach((line) => terminal.writeln(orange(line)));
           bannerShown = false;
         }
         terminal.write("Last login: " + new Date().toLocaleString() + " / help?");
@@ -78,7 +68,199 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
 
       printBanner(t);
 
+      // ------------------------------------------------------------------
+      // FLAPPY — playable ascii flappy bird right inside the terminal.
+      // Aesthetic matches the banner: orange bird, Claude-orange HUD.
+      // ------------------------------------------------------------------
+      let flappy = null; // { timer, state }
+
+      const stopFlappy = () => {
+        if (flappy?.timer) clearInterval(flappy.timer);
+        if (term) term._flappyTimer = null;
+        flappy = null;
+      };
+
+      const exitFlappy = () => {
+        stopFlappy();
+        t.write("\x1b[2J\x1b[H");
+        printBanner(t);
+      };
+
+      const startFlappy = () => {
+        if (flappy) return;
+
+        const W = Math.max(30, Math.min(56, t.cols - 6));
+        const H = 17;
+        const GROUND = H - 1;
+        const BIRD_X = 8;
+
+        const state = {
+          birdY: Math.floor(H / 2),
+          vel: 0,
+          pipes: [],
+          score: 0,
+          best: Number(globalThis.localStorage?.getItem("flappy-best") || 0),
+          over: false,
+        };
+
+        const spawnPipe = (x) => {
+          const gap = 5;
+          const gapY = 2 + Math.floor(Math.random() * Math.max(1, GROUND - gap - 3));
+          state.pipes.push({ x, gapY, gap, passed: false });
+        };
+        spawnPipe(W - 8);
+
+        const flap = () => {
+          if (!state.over) state.vel = -1.3;
+        };
+
+        const drawBox = (lines, width) => {
+          const pad = (s) => s + " ".repeat(Math.max(0, width - s.length));
+          t.write(`\r\n${orange(`╭${"─".repeat(width)}╮`)}`);
+          lines.forEach((line) => t.write(`\r\n${orange("│")}${pad(line)}${orange("│")}`));
+          t.write(`\r\n${orange(`╰${"─".repeat(width)}╯`)}`);
+        };
+
+        const render = () => {
+          const grid = Array.from({ length: H }, () => Array(W).fill(" "));
+
+          state.pipes.forEach((p) => {
+            const px = Math.round(p.x);
+            for (let y = 0; y < GROUND; y += 1) {
+              if (y < p.gapY || y >= p.gapY + p.gap) {
+                for (let dx = 0; dx < 2; dx += 1) {
+                  const x = px + dx;
+                  if (x >= 0 && x < W) grid[y][x] = "P";
+                }
+              }
+            }
+          });
+
+          const by = Math.round(state.birdY);
+          if (by >= 0 && by < GROUND) grid[by][BIRD_X] = "B";
+
+          for (let x = 0; x < W; x += 1) grid[GROUND][x] = "=";
+
+          const hud = ` SCORE ${state.score}  ·  BEST ${state.best} `;
+          const out = [`\x1b[2J\x1b[H${orange(hud)}`];
+
+          grid.forEach((row) => {
+            let line = "";
+            let runColor = null;
+            row.forEach((ch) => {
+              let color = null;
+              if (ch === "P") color = "34;197;94";
+              else if (ch === "B") color = `${BANNER_COLORS.fill.join(";")}`;
+              else if (ch === "=") color = "113;113;122";
+              if (ch === " ") {
+                line += " ";
+                runColor = null;
+                return;
+              }
+              const prefix = color && color !== runColor ? `\x1b[38;2;${color}m` : "";
+              runColor = color;
+              line += prefix + (ch === "B" ? "▓" : ch === "=" ? "░" : "█");
+            });
+            out.push(line + ANSI_RESET);
+          });
+
+          if (state.over) {
+            out.push("");
+            const best = Math.max(state.best, state.score);
+            const lines = [
+              "        GAME OVER          ",
+              `      SCORE ${String(state.score).padStart(2, "0")} · BEST ${String(best).padStart(2, "0")}       `,
+              "   [R] restart   [Q] quit   ",
+            ]
+              .map((l) => l)
+              .map((l) => l.slice(0, 28));
+            const width = 28;
+            const padLine = (s) => s + " ".repeat(Math.max(0, width - s.length));
+            out.push(orange(`╭${"─".repeat(width)}╮`));
+            lines.forEach((l) => out.push(`${orange("│")}\x1b[1m${orange(padLine(l))}${ANSI_RESET}${orange("│")}`));
+            out.push(orange(`╰${"─".repeat(width)}╯`));
+          } else {
+            out.push(`${orange(" [SPACE]")} flap   ${orange("[Q]")} quit`);
+          }
+
+          t.write(out.join("\r\n"));
+        };
+
+        const tick = () => {
+          if (state.over) return;
+
+          state.vel += 0.42;
+          state.birdY += state.vel;
+          if (state.birdY < 0) {
+            state.birdY = 0;
+            state.over = true;
+          }
+
+          state.pipes.forEach((p) => {
+            p.x -= 0.5;
+            if (!p.passed && p.x + 2 < BIRD_X) {
+              p.passed = true;
+              state.score += 1;
+            }
+          });
+          state.pipes = state.pipes.filter((p) => p.x > -3);
+          const last = state.pipes[state.pipes.length - 1];
+          if (!last || last.x < W - 18) spawnPipe(W - 2);
+
+          const bx = BIRD_X;
+          const by = Math.round(state.birdY);
+          if (by >= GROUND) {
+            state.birdY = GROUND - 0.01;
+            state.over = true;
+          } else {
+            for (const p of state.pipes) {
+              const px = Math.round(p.x);
+              if (bx >= px && bx < px + 2 && (by < p.gapY || by >= p.gapY + p.gap)) {
+                state.over = true;
+                break;
+              }
+            }
+          }
+
+          if (state.over) {
+            state.best = Math.max(state.best, state.score);
+            try {
+              globalThis.localStorage?.setItem("flappy-best", String(state.best));
+            } catch {
+              /* private mode */
+            }
+            clearInterval(flappy.timer);
+          }
+
+          render();
+        };
+
+        render();
+        flappy = { timer: setInterval(tick, 110), state };
+        if (term) term._flappyTimer = flappy.timer;
+      };
+
       t.onData((data) => {
+        // Flappy takes over the keyboard while active.
+        if (flappy) {
+          if (data === "q" || data === "Q") {
+            exitFlappy();
+            return;
+          }
+          if (flappy.state.over) {
+            if (data === "r" || data === "R") {
+              stopFlappy();
+              t.write("\x1b[2J\x1b[H");
+              startFlappy();
+            }
+            return;
+          }
+          if (data === " " || data === "w" || data === "W" || data === "\x1b[A") {
+            flappy.state.vel = -1.3;
+          }
+          return;
+        }
+
         const code = data.charCodeAt(0);
 
         if (code === 13) {
@@ -119,6 +301,9 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
                 "\x1b[1;38;2;16;185;129mprojects\x1b[0m  \x1b[38;2;75;85;99m- Display portfolio projects\x1b[0m",
               );
               println(
+                `${orange("flappy")}    \x1b[38;2;75;85;99m- Play ascii flappy bird\x1b[0m`,
+              );
+              println(
                 "\x1b[1;38;2;16;185;129msudo\x1b[0m      \x1b[38;2;75;85;99m- Run superuser command\x1b[0m",
               );
               break;
@@ -137,25 +322,19 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
             case "about":
               println(`\x1b[1;38;2;219;39;119m=== About ${OWNER_NAME} ===\x1b[0m`);
               println(`\x1b[1;38;2;16;185;129mName:      \x1b[38;2;75;85;99m${OWNER_NAME}\x1b[0m`);
-              println(
-                `\x1b[1;38;2;16;185;129mRole:      \x1b[38;2;75;85;99m${profile.role}\x1b[0m`,
-              );
+              println(`\x1b[1;38;2;16;185;129mRole:      \x1b[38;2;75;85;99m${profile.role}\x1b[0m`);
               println(
                 `\x1b[1;38;2;16;185;129mLocation:  \x1b[38;2;75;85;99m${OWNER_LOCATION.city}, ${OWNER_LOCATION.country}\x1b[0m`,
               );
               println(`\x1b[1;38;2;16;185;129mEmail:     \x1b[4;38;2;37;99;235m${EMAIL}\x1b[0m`);
-              println(
-                `\x1b[1;38;2;16;185;129mGitHub:    \x1b[4;38;2;37;99;235m${GITHUB_PROFILE}\x1b[0m`,
-              );
-              println(
-                `\x1b[1;38;2;16;185;129mPortfolio: \x1b[4;38;2;37;99;235m${PORTFOLIO_URL}\x1b[0m`,
-              );
+              println(`\x1b[1;38;2;16;185;129mGitHub:    \x1b[4;38;2;37;99;235m${GITHUB_PROFILE}\x1b[0m`);
+              println(`\x1b[1;38;2;16;185;129mPortfolio: \x1b[4;38;2;37;99;235m${PORTFOLIO_URL}\x1b[0m`);
               println("\x1b[1;38;2;6;182;212m\r\nBio:\x1b[0m");
               profile.bio.forEach((line) => {
                 println(`\x1b[38;2;75;85;99m${line}\x1b[0m`);
               });
               println(
-                "\x1b[38;2;75;85;99mType \x1b[1;38;2;16;185;129mtechstack\x1b[0m\x1b[38;2;75;85;99m for skills or \x1b[1;38;2;16;185;129mprojects\x1b[0m\x1b[38;2;75;85;99m for work.\x1b[0m",
+                "\x1b[38;2;75;85;99mType \x1b[1;38;2;16;185;129mtechstack\x1b[0m\x1b[38;2;75;85;99m for skills, \x1b[1;38;2;16;185;129mprojects\x1b[0m\x1b[38;2;75;85;99m for work, or \x1b[1;38;2;16;185;129mflappy\x1b[0m\x1b[38;2;75;85;99m to play.\x1b[0m",
               );
               break;
             case "sudo":
@@ -191,6 +370,10 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
                 println("");
               });
               break;
+            case "flappy":
+              t.write("\x1b[2J\x1b[H");
+              startFlappy();
+              break;
             default:
               println(`\x1b[31mzsh: command not found: ${baseCmd}\x1b[0m`);
           }
@@ -219,10 +402,13 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
           fontSize: 14,
           lineHeight: 1.4,
           theme: {
-            background: "#ffffff",
-            foreground: "#333333",
-            cursor: "#333333",
-            selectionBackground: "#b5d5ff",
+            background: "#161618",
+            foreground: "#d4d4d8",
+            cursor: "#f2642c",
+            cursorAccent: "#161618",
+            selectionBackground: "#7c2d12",
+            black: "#18181b",
+            brightBlack: "#52525b",
           },
         });
 
@@ -262,10 +448,10 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
           /* empty */
         }
 
-        // Debounced banner toggle on resize
+        // Debounced banner toggle on resize (skip while flappy is running).
         if (resizeTimer) clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-          if (!term || !printBanner) return;
+          if (!term || !printBanner || term._flappyTimer) return;
           const shouldShow = term.cols >= minBannerCols;
           if (shouldShow !== bannerShown) {
             term.reset();
@@ -296,6 +482,10 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
     return () => {
       clearTimeout(timer);
       resizeObserver.disconnect();
+      if (term?._flappyTimer) {
+        clearInterval(term._flappyTimer);
+        term._flappyTimer = null;
+      }
       if (term) {
         term.dispose();
       }
@@ -307,7 +497,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
   return (
     <div
       ref={terminalRef}
-      className="flex-1 w-full bg-white pt-4 px-4 pb-12 outline-none xterm-wrapper"
+      className="flex-1 w-full bg-[#161618] pt-4 px-4 pb-12 outline-none xterm-wrapper"
       style={{ overflow: "hidden" }}
     />
   );

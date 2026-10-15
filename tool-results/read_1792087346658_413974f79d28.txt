@@ -1,0 +1,669 @@
+     1→import { useState, useEffect, useRef } from "react";
+     2→import { createPortal } from "react-dom";
+     3→import { WIDGET_OPTIONS } from "@store/widgets";
+     4→import useTimeStore from "@store/time";
+     5→import WEATHER_DATA from "@module/desktop/apps/weather/data/weatherData";
+     6→import AnalogClockFace from "@module/desktop/widgets/ui/components/AnalogClockFace";
+     7→
+     8→const WidgetPreview = ({ type }) => {
+     9→  const time = useTimeStore((state) => state.time);
+    10→  const timeLabel = `${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}`;
+    11→  const day = time.getDate();
+    12→  const monthStart = new Date(time.getFullYear(), time.getMonth(), 1).getDay();
+    13→  const monthLength = new Date(time.getFullYear(), time.getMonth() + 1, 0).getDate();
+    14→  const monthDays = [
+    15→    ...Array(monthStart).fill(null),
+    16→    ...Array.from({ length: monthLength }, (_, index) => index + 1),
+    17→  ];
+    18→
+    19→  if (type === "battery") {
+    20→    return (
+    21→      <div className="flex h-full w-full items-center gap-2.5 bg-black/20 px-3 text-white">
+    22→        <div className="relative h-6 w-11 rounded-[5px] border border-white/70 p-[2px]">
+    23→          <span className="block h-full w-3/4 rounded-[2px] bg-green-400" />
+    24→          <span className="absolute -right-1 top-1.5 h-2 w-1 rounded-r-sm bg-white/70" />
+    25→        </div>
+    26→        <div>
+    27→          <span className="block text-[11px] font-medium">Battery</span>
+    28→          <span className="text-[9px] text-white/60">Power status</span>
+    29→        </div>
+    30→      </div>
+    31→    );
+    32→  }
+    33→
+    34→  if (type === "notes") {
+    35→    return (
+    36→      <div className="flex h-full w-full flex-col justify-center bg-gradient-to-br from-amber-100 to-yellow-200 px-3 text-zinc-700">
+    37→        <span className="text-[10px] font-semibold">Quick Note</span>
+    38→        <span className="mt-1 text-[8px] leading-tight text-zinc-500">
+    39→          Ideas, reminders, and things to remember.
+    40→        </span>
+    41→      </div>
+    42→    );
+    43→  }
+    44→
+    45→  if (type === "weather") {
+    46→    return (
+    47→      <>
+    48→        <img
+    49→          src="/weather/sunny-sky.webp"
+    50→          alt=""
+    51→          className="absolute inset-0 h-full w-full object-cover"
+    52→        />
+    53→        <span className="absolute inset-0 bg-gradient-to-b from-sky-950/20 via-transparent to-sky-950/70" />
+    54→        <span className="absolute left-3 top-2 text-[9px] font-medium text-white/90">Delhi</span>
+    55→        <span className="absolute bottom-2 left-3 text-3xl font-light text-white">
+    56→          {WEATHER_DATA.delhi.tempC}°
+    57→        </span>
+    58→        <span className="absolute bottom-3 right-3 text-[9px] text-white/90">
+    59→          {WEATHER_DATA.delhi.condition}
+    60→        </span>
+    61→      </>
+    62→    );
+    63→  }
+    64→
+    65→  if (type === "clock") {
+    66→    return (
+    67→      <div className="flex h-full w-full flex-col items-center justify-center bg-black/20 text-white">
+    68→        <span className="text-[32px] font-light tracking-tight">{timeLabel}</span>
+    69→        <span className="text-[9px] text-white/70">
+    70→          {time.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+    71→        </span>
+    72→      </div>
+    73→    );
+    74→  }
+    75→
+    76→  if (type === "analog-clock") {
+    77→    return (
+    78→      <div className="flex h-full w-full items-center justify-center bg-black/20">
+    79→        <AnalogClockFace time={time} className="h-[52px] w-[52px] drop-shadow-md" />
+    80→      </div>
+    81→    );
+    82→  }
+    83→
+    84→  return (
+    85→    <div className="flex h-full w-full items-center gap-2 bg-black/20 px-2.5 text-white">
+    86→      <div className="min-w-0 flex-1">
+    87→        <span className="block truncate text-[7px] font-medium text-white/70">
+    88→          {time.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+    89→        </span>
+    90→        <span className="mt-0.5 block text-[19px] font-light tracking-tight">{timeLabel}</span>
+    91→      </div>
+    92→      <div className="grid w-[54px] shrink-0 grid-cols-7 gap-x-0.5 gap-y-0.5 text-center text-[6px] text-white/65">
+    93→        {["S", "M", "T", "W", "T", "F", "S", ...monthDays.slice(0, 14)].map((date, index) => (
+    94→          <span key={index} className={date === day ? "rounded-full bg-blue-500 text-white" : ""}>
+    95→            {date}
+    96→          </span>
+    97→        ))}
+    98→      </div>
+    99→    </div>
+   100→  );
+   101→};
+   102→
+   103→const DesktopContextMenu = ({
+   104→  menu,
+   105→  onClose,
+   106→  onNewFolder,
+   107→  onGetInfo,
+   108→  activeWidgets = [],
+   109→  onToggleWidget,
+   110→  onOpenProjects,
+   111→  onOpenProject,
+   112→  projects = [],
+   113→  onOpenApp,
+   114→  onOpenTerminal,
+   115→  onOpenSettings,
+   116→  onCleanUp,
+   117→  onOpenFolder,
+   118→  onRenameFolder,
+   119→  onDeleteFolder,
+   120→  onDeleteCustomFolder,
+   121→  onOpenShortcut,
+   122→  onDeleteShortcut,
+   123→}) => {
+   124→  const menuRef = useRef(null);
+   125→  const [activeSubmenu, setActiveSubmenu] = useState(null);
+   126→  const [copied, setCopied] = useState(false);
+   127→
+   128→  // Close when clicking outside or pressing Escape / shortcut key
+   129→  useEffect(() => {
+   130→    const handlePointerDown = (e) => {
+   131→      if (menuRef.current && !menuRef.current.contains(e.target)) {
+   132→        onClose();
+   133→      }
+   134→    };
+   135→
+   136→    const handleKeyDown = (e) => {
+   137→      if (e.key === "Escape") {
+   138→        onClose();
+   139→      } else if (
+   140→        (e.key === "Backspace" || e.key === "Delete") &&
+   141→        (e.metaKey || e.ctrlKey || menu?.type === "folder" || menu?.type === "shortcut")
+   142→      ) {
+   143→        if (menu?.type === "folder" && menu?.target) {
+   144→          e.preventDefault();
+   145→          if (onDeleteFolder) {
+   146→            onDeleteFolder(menu.target);
+   147→          } else if (onDeleteCustomFolder) {
+   148→            onDeleteCustomFolder(menu.target?.id);
+   149→          }
+   150→          onClose();
+   151→        } else if (menu?.type === "shortcut" && menu?.target) {
+   152→          e.preventDefault();
+   153→          if (onDeleteShortcut) {
+   154→            onDeleteShortcut(menu.target.id);
+   155→          }
+   156→          onClose();
+   157→        }
+   158→      }
+   159→    };
+   160→
+   161→    window.addEventListener("pointerdown", handlePointerDown);
+   162→    window.addEventListener("keydown", handleKeyDown);
+   163→    window.addEventListener("resize", onClose);
+   164→
+   165→    return () => {
+   166→      window.removeEventListener("pointerdown", handlePointerDown);
+   167→      window.removeEventListener("keydown", handleKeyDown);
+   168→      window.removeEventListener("resize", onClose);
+   169→    };
+   170→  }, [menu, onDeleteFolder, onDeleteCustomFolder, onDeleteShortcut, onClose]);
+   171→
+   172→  if (!menu) return null;
+   173→
+   174→  // Keep the menu and its side panels clear of the dock.
+   175→  const menuWidth = 240;
+   176→  const menuHeight = menu.type === "desktop" ? 300 : 180;
+   177→  const dockTop = document.querySelector("#dock:not(.dock-hidden)")?.getBoundingClientRect().top;
+   178→  const menuBottom = Math.min(window.innerHeight - 10, (dockTop ?? window.innerHeight) - 8);
+   179→  const left = Math.max(10, Math.min(menu.x, window.innerWidth - menuWidth - 10));
+   180→  const top = Math.max(8, Math.min(menu.y, menuBottom - menuHeight));
+   181→  const openSubmenuLeft = left + menuWidth + 4 + 180 > window.innerWidth - 8;
+   182→  const sidePanelHeight = 310;
+   183→  const widgetSubmenuWidth = 264;
+   184→  const openWidgetSubmenuLeft = left + menuWidth + widgetSubmenuWidth > window.innerWidth - 8;
+   185→  const widgetSubmenuLeft = Math.max(
+   186→    8,
+   187→    Math.min(
+   188→      openWidgetSubmenuLeft ? left - widgetSubmenuWidth : left + menuWidth,
+   189→      window.innerWidth - widgetSubmenuWidth - 8,
+   190→    ),
+   191→  );
+   192→  const widgetSubmenuOffsetLeft = widgetSubmenuLeft - left - 4;
+   193→  const widgetSubmenuTop = Math.max(8, Math.min(top + 86, menuBottom - sidePanelHeight));
+   194→  const widgetSubmenuOffsetTop = widgetSubmenuTop - top - 86;
+   195→
+   196→  const handleCopy = (text) => {
+   197→    if (typeof navigator !== "undefined" && navigator.clipboard) {
+   198→      navigator.clipboard.writeText(text);
+   199→      setCopied(true);
+   200→      setTimeout(() => {
+   201→        setCopied(false);
+   202→        onClose();
+   203→      }, 600);
+   204→    } else {
+   205→      onClose();
+   206→    }
+   207→  };
+   208→
+   209→  return createPortal(
+   210→    <div
+   211→      ref={menuRef}
+   212→      className="fixed z-[99999] w-[240px] select-none rounded-[10px] p-1 font-sans text-[13px] leading-tight text-[#f5f5f7] animate-in fade-in zoom-in-95 duration-100 ease-out shadow-[0_18px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.12)_inset]"
+   213→      style={{
+   214→        left: `${left}px`,
+   215→        top: `${top}px`,
+   216→        background: "rgba(30, 30, 30, 0.72)",
+   217→        backdropFilter: "blur(40px) saturate(210%)",
+   218→        WebkitBackdropFilter: "blur(40px) saturate(210%)",
+   219→        border: "1px solid rgba(255, 255, 255, 0.16)",
+   220→      }}
+   221→      onClick={(e) => e.stopPropagation()}
+   222→      onContextMenu={(e) => {
+   223→        e.preventDefault();
+   224→        e.stopPropagation();
+   225→      }}
+   226→    >
+   227→      {/* ─── DESKTOP CONTEXT MENU ─── */}
+   228→      {menu.type === "desktop" && (
+   229→        <div className="flex flex-col">
+   230→          {/* New Folder */}
+   231→          <button
+   232→            onClick={() => {
+   233→              onNewFolder();
+   234→              onClose();
+   235→            }}
+   236→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   237→          >
+   238→            <span>New Folder</span>
+   239→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   240→              ⇧⌘N
+   241→            </span>
+   242→          </button>
+   243→
+   244→          <div className="my-1 h-[0.5px] bg-white/12 mx-1" />
+   245→
+   246→          {/* Get Info */}
+   247→          <button
+   248→            onClick={() => {
+   249→              onGetInfo();
+   250→              onClose();
+   251→            }}
+   252→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   253→          >
+   254→            <span>Get Info</span>
+   255→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   256→              ⌘I
+   257→            </span>
+   258→          </button>
+   259→
+   260→          {/* Add Widgets */}
+   261→          <div
+   262→            className="relative"
+   263→            onMouseEnter={() => setActiveSubmenu("widgets")}
+   264→            onMouseLeave={() => setActiveSubmenu(null)}
+   265→          >
+   266→            {activeSubmenu === "widgets" && (
+   267→              <span
+   268→                aria-hidden="true"
+   269→                className={`pointer-events-auto absolute top-0 z-[99999] h-full w-1 ${
+   270→                  openWidgetSubmenuLeft ? "right-full" : "left-full"
+   271→                }`}
+   272→              />
+   273→            )}
+   274→            <button
+   275→              onClick={() =>
+   276→                setActiveSubmenu((current) => (current === "widgets" ? null : "widgets"))
+   277→              }
+   278→              aria-haspopup="true"
+   279→              aria-expanded={activeSubmenu === "widgets"}
+   280→              className={`group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors cursor-default ${
+   281→                activeSubmenu === "widgets"
+   282→                  ? "bg-gradient-to-b from-[#1687ff] to-[#0071e3] text-white"
+   283→                  : "hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white"
+   284→              }`}
+   285→            >
+   286→              <span>Add Widgets</span>
+   287→              <svg
+   288→                className="h-3 w-3 text-white/50 group-hover:text-white"
+   289→                viewBox="0 0 24 24"
+   290→                fill="none"
+   291→                stroke="currentColor"
+   292→                strokeWidth="2.5"
+   293→              >
+   294→                <polyline points="9 18 15 12 9 6" />
+   295→              </svg>
+   296→            </button>
+   297→
+   298→            {activeSubmenu === "widgets" && (
+   299→              <div
+   300→                className="absolute z-[100000] w-[264px] max-w-[calc(100vw-16px)] rounded-[10px] p-2 font-sans text-[13px] text-[#f5f5f7] shadow-[0_18px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.12)_inset] animate-in fade-in zoom-in-95 duration-100"
+   301→                style={{
+   302→                  left: `${widgetSubmenuOffsetLeft}px`,
+   303→                  top: `${widgetSubmenuOffsetTop}px`,
+   304→                  maxHeight: `${Math.max(0, menuBottom - widgetSubmenuTop)}px`,
+   305→                  overflowY: "auto",
+   306→                  background: "rgba(30, 30, 30, 0.85)",
+   307→                  backdropFilter: "blur(40px) saturate(210%)",
+   308→                  WebkitBackdropFilter: "blur(40px) saturate(210%)",
+   309→                  border: "1px solid rgba(255, 255, 255, 0.16)",
+   310→                }}
+   311→              >
+   312→                <p className="px-1 pb-2 text-[11px] font-medium text-white/55">Add Widgets</p>
+   313→                <div className="grid grid-cols-2 gap-2">
+   314→                  {WIDGET_OPTIONS.map((widget) => {
+   315→                    const isActive = activeWidgets.includes(widget.type);
+   316→                    return (
+   317→                      <button
+   318→                        key={widget.type}
+   319→                        type="button"
+   320→                        aria-pressed={isActive}
+   321→                        onClick={() => onToggleWidget?.(widget.type)}
+   322→                        className="group min-w-0 rounded-md p-1 text-left text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1687ff]"
+   323→                      >
+   324→                        <span
+   325→                          className={`relative block aspect-[2/1] overflow-hidden rounded-[6px] border ${
+   326→                            isActive
+   327→                              ? "border-[#62aaff]"
+   328→                              : "border-white/15 group-hover:border-white/40"
+   329→                          }`}
+   330→                        >
+   331→                          <WidgetPreview type={widget.type} />
+   332→                          <span
+   333→                            className={`absolute right-1 top-1 flex h-[18px] w-[18px] items-center justify-center rounded-full text-[12px] leading-none text-white shadow ${
+   334→                              isActive
+   335→                                ? "bg-[#1687ff]"
+   336→                                : "bg-black/45 opacity-0 transition-opacity group-hover:opacity-100"
+   337→                            }`}
+   338→                          >
+   339→                            {isActive ? "✓" : "+"}
+   340→                          </span>
+   341→                        </span>
+   342→                        <span className="mt-1 block truncate px-0.5 text-[11px] font-medium">
+   343→                          {widget.label}
+   344→                        </span>
+   345→                      </button>
+   346→                    );
+   347→                  })}
+   348→                </div>
+   349→              </div>
+   350→            )}
+   351→          </div>
+   352→
+   353→          <div className="my-1 h-[0.5px] bg-white/12 mx-1" />
+   354→
+   355→          {/* Browse Projects */}
+   356→          <button
+   357→            onClick={() => {
+   358→              onOpenProjects();
+   359→              onClose();
+   360→            }}
+   361→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   362→          >
+   363→            <span>Browse Projects</span>
+   364→          </button>
+   365→
+   366→          {/* Choose a Project (Submenu) */}
+   367→          <div
+   368→            className="relative"
+   369→            onMouseEnter={() => setActiveSubmenu("sortBy")}
+   370→            onMouseLeave={() => setActiveSubmenu(null)}
+   371→          >
+   372→            {activeSubmenu === "sortBy" && (
+   373→              <span
+   374→                aria-hidden="true"
+   375→                className={`pointer-events-auto absolute top-0 z-[99999] h-full w-1 ${
+   376→                  openSubmenuLeft ? "right-full" : "left-full"
+   377→                }`}
+   378→              />
+   379→            )}
+   380→            <button
+   381→              className={`group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors cursor-default ${
+   382→                activeSubmenu === "sortBy"
+   383→                  ? "bg-gradient-to-b from-[#1687ff] to-[#0071e3] text-white"
+   384→                  : "hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white"
+   385→              }`}
+   386→            >
+   387→              <span>Choose a Project</span>
+   388→              <svg
+   389→                className="h-3 w-3 text-white/50 group-hover:text-white"
+   390→                viewBox="0 0 24 24"
+   391→                fill="none"
+   392→                stroke="currentColor"
+   393→                strokeWidth="2.5"
+   394→              >
+   395→                <polyline points="9 18 15 12 9 6" />
+   396→              </svg>
+   397→            </button>
+   398→
+   399→            {activeSubmenu === "sortBy" && (
+   400→              <div
+   401→                className={`absolute top-0 z-[100000] w-[180px] rounded-[10px] p-1 font-sans text-[13px] text-[#f5f5f7] shadow-[0_18px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.12)_inset] animate-in fade-in zoom-in-95 duration-100 ${
+   402→                  openSubmenuLeft ? "right-full -translate-x-1" : "left-full translate-x-1"
+   403→                }`}
+   404→                style={{
+   405→                  background: "rgba(30, 30, 30, 0.85)",
+   406→                  backdropFilter: "blur(40px) saturate(210%)",
+   407→                  WebkitBackdropFilter: "blur(40px) saturate(210%)",
+   408→                  border: "1px solid rgba(255, 255, 255, 0.16)",
+   409→                }}
+   410→              >
+   411→                {projects.map((project) => (
+   412→                  <button
+   413→                    key={project.id}
+   414→                    onClick={() => {
+   415→                      onOpenProject(project);
+   416→                      onClose();
+   417→                    }}
+   418→                    className="flex h-[26px] w-full items-center rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   419→                  >
+   420→                    <span className="truncate">{project.name}</span>
+   421→                  </button>
+   422→                ))}
+   423→                {projects.length === 0 && (
+   424→                  <span className="px-2.5 py-1.5 text-xs text-white/50">No projects available</span>
+   425→                )}
+   426→              </div>
+   427→            )}
+   428→          </div>
+   429→
+   430→          {/* Reset Folder Positions */}
+   431→          <button
+   432→            onClick={() => {
+   433→              onCleanUp();
+   434→              onClose();
+   435→            }}
+   436→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   437→          >
+   438→            <span>Reset Folder Positions</span>
+   439→          </button>
+   440→
+   441→          {/* Quick Open (Submenu) */}
+   442→          <div
+   443→            className="relative"
+   444→            onMouseEnter={() => setActiveSubmenu("cleanUpBy")}
+   445→            onMouseLeave={() => setActiveSubmenu(null)}
+   446→          >
+   447→            {activeSubmenu === "cleanUpBy" && (
+   448→              <span
+   449→                aria-hidden="true"
+   450→                className={`pointer-events-auto absolute top-0 z-[99999] h-full w-1 ${
+   451→                  openSubmenuLeft ? "right-full" : "left-full"
+   452→                }`}
+   453→              />
+   454→            )}
+   455→            <button
+   456→              className={`group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors cursor-default ${
+   457→                activeSubmenu === "cleanUpBy"
+   458→                  ? "bg-gradient-to-b from-[#1687ff] to-[#0071e3] text-white"
+   459→                  : "hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white"
+   460→              }`}
+   461→            >
+   462→              <span>Quick Open</span>
+   463→              <svg
+   464→                className="h-3 w-3 text-white/50 group-hover:text-white"
+   465→                viewBox="0 0 24 24"
+   466→                fill="none"
+   467→                stroke="currentColor"
+   468→                strokeWidth="2.5"
+   469→              >
+   470→                <polyline points="9 18 15 12 9 6" />
+   471→              </svg>
+   472→            </button>
+   473→
+   474→            {activeSubmenu === "cleanUpBy" && (
+   475→              <div
+   476→                className={`absolute top-0 z-[100000] w-[180px] rounded-[10px] p-1 font-sans text-[13px] text-[#f5f5f7] shadow-[0_18px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.12)_inset] animate-in fade-in zoom-in-95 duration-100 ${
+   477→                  openSubmenuLeft ? "right-full -translate-x-1" : "left-full translate-x-1"
+   478→                }`}
+   479→                style={{
+   480→                  background: "rgba(30, 30, 30, 0.85)",
+   481→                  backdropFilter: "blur(40px) saturate(210%)",
+   482→                  WebkitBackdropFilter: "blur(40px) saturate(210%)",
+   483→                  border: "1px solid rgba(255, 255, 255, 0.16)",
+   484→                }}
+   485→              >
+   486→                {[
+   487→                  { label: "Projects", action: onOpenProjects },
+   488→                  { label: "Contact", action: () => onOpenApp("contact") },
+   489→                  { label: "Resume", action: () => onOpenApp("resume") },
+   490→                ].map(({ label, action }) => (
+   491→                  <button
+   492→                    key={label}
+   493→                    onClick={() => {
+   494→                      action();
+   495→                      onClose();
+   496→                    }}
+   497→                    className="flex h-[26px] w-full items-center rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   498→                  >
+   499→                    {label}
+   500→                  </button>
+   501→                ))}
+   502→              </div>
+   503→            )}
+   504→          </div>
+   505→
+   506→          <div className="my-1 h-[0.5px] bg-white/12 mx-1" />
+   507→
+   508→          {/* Open in Terminal */}
+   509→          <button
+   510→            onClick={() => {
+   511→              onOpenTerminal();
+   512→              onClose();
+   513→            }}
+   514→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   515→          >
+   516→            <span>Open in Terminal</span>
+   517→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   518→              ⌃⌥T
+   519→            </span>
+   520→          </button>
+   521→
+   522→          {/* Open Settings */}
+   523→          <button
+   524→            onClick={() => {
+   525→              onOpenSettings();
+   526→              onClose();
+   527→            }}
+   528→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   529→          >
+   530→            <span>Open Settings...</span>
+   531→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   532→              ⌘J
+   533→            </span>
+   534→          </button>
+   535→        </div>
+   536→      )}
+   537→
+   538→      {/* ─── FOLDER CONTEXT MENU ─── */}
+   539→      {menu.type === "folder" && (
+   540→        <div className="flex flex-col">
+   541→          {/* Rename */}
+   542→          <button
+   543→            onClick={() => {
+   544→              if (onRenameFolder) {
+   545→                onRenameFolder(menu.target);
+   546→              }
+   547→              onClose();
+   548→            }}
+   549→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   550→          >
+   551→            <span>Rename</span>
+   552→          </button>
+   553→
+   554→          <button
+   555→            onClick={() => {
+   556→              onOpenFolder(menu.target);
+   557→              onClose();
+   558→            }}
+   559→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   560→          >
+   561→            <span>Open in Finder</span>
+   562→          </button>
+   563→
+   564→          <div className="my-1 h-[0.5px] bg-white/12 mx-1" />
+   565→
+   566→          {/* Get Info */}
+   567→          <button
+   568→            onClick={() => {
+   569→              onGetInfo(menu.target);
+   570→              onClose();
+   571→            }}
+   572→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   573→          >
+   574→            <span>Get Info</span>
+   575→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   576→              ⌘I
+   577→            </span>
+   578→          </button>
+   579→
+   580→          {/* Copy Name */}
+   581→          <button
+   582→            onClick={() => handleCopy(menu.target?.name || "Folder")}
+   583→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   584→          >
+   585→            <span>{copied ? "Copied!" : "Copy"}</span>
+   586→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   587→              ⌘C
+   588→            </span>
+   589→          </button>
+   590→
+   591→          <div className="my-1 h-[0.5px] bg-white/12 mx-1" />
+   592→
+   593→          {/* Move to Trash */}
+   594→          <button
+   595→            onClick={() => {
+   596→              if (onDeleteFolder) {
+   597→                onDeleteFolder(menu.target);
+   598→              } else if (onDeleteCustomFolder) {
+   599→                onDeleteCustomFolder(menu.target?.id);
+   600→              }
+   601→              onClose();
+   602→            }}
+   603→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   604→          >
+   605→            <span>Move to Trash</span>
+   606→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   607→              ⌘⌫
+   608→            </span>
+   609→          </button>
+   610→        </div>
+   611→      )}
+   612→
+   613→      {/* ─── DESKTOP SHORTCUT CONTEXT MENU ─── */}
+   614→      {menu.type === "shortcut" && (
+   615→        <div className="flex flex-col">
+   616→          {/* Open App */}
+   617→          <button
+   618→            onClick={() => {
+   619→              onOpenShortcut(menu.target?.appId);
+   620→              onClose();
+   621→            }}
+   622→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   623→          >
+   624→            <span>Open {menu.target?.name || "App"}</span>
+   625→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   626→              ⌘O
+   627→            </span>
+   628→          </button>
+   629→
+   630→          <div className="my-1 h-[0.5px] bg-white/12 mx-1" />
+   631→
+   632→          {/* Get Info */}
+   633→          <button
+   634→            onClick={() => {
+   635→              onGetInfo(menu.target);
+   636→              onClose();
+   637→            }}
+   638→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   639→          >
+   640→            <span>Get Info</span>
+   641→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   642→              ⌘I
+   643→            </span>
+   644→          </button>
+   645→
+   646→          <div className="my-1 h-[0.5px] bg-white/12 mx-1" />
+   647→
+   648→          {/* Delete Shortcut */}
+   649→          <button
+   650→            onClick={() => {
+   651→              onDeleteShortcut(menu.target?.id);
+   652→              onClose();
+   653→            }}
+   654→            className="group flex h-[26px] w-full items-center justify-between rounded-[5px] px-2.5 text-left text-white/90 transition-colors hover:bg-gradient-to-b hover:from-[#1687ff] hover:to-[#0071e3] hover:text-white cursor-default"
+   655→          >
+   656→            <span>Delete Shortcut</span>
+   657→            <span className="text-[12px] text-white/40 tracking-wider group-hover:text-white">
+   658→              ⌘⌫
+   659→            </span>
+   660→          </button>
+   661→        </div>
+   662→      )}
+   663→    </div>,
+   664→    document.body,
+   665→  );
+   666→};
+   667→
+   668→export default DesktopContextMenu;
+   669→

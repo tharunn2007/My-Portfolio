@@ -2,8 +2,8 @@ import { create } from "zustand";
 
 export const WIDGET_OPTIONS = [
   {
-    type: "clock-calendar",
-    label: "Time & Calendar",
+    type: "github-heatmap",
+    label: "GitHub Heatmap",
   },
   {
     type: "clock",
@@ -28,7 +28,7 @@ export const WIDGET_OPTIONS = [
 ];
 
 const useWidgetsStore = create((set) => ({
-  widgets: ["clock-calendar"],
+  widgets: ["github-heatmap"],
   toggleWidget: (type) =>
     set((state) => ({
       widgets: state.widgets.includes(type)

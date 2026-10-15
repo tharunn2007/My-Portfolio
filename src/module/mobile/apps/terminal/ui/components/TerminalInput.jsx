@@ -13,6 +13,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
     { label: "clear", cmd: "clear" },
     { label: "techstack", cmd: "techstack" },
     { label: "projects", cmd: "projects" },
+    { label: "flappy", cmd: "flappy" },
     { label: "whoami", cmd: "whoami" },
     { label: "sudo", cmd: "sudo" },
   ];
@@ -97,6 +98,16 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         break;
       case "whoami":
         println(`\x1b[38;2;75;85;99m${OWNER_HANDLE}\x1b[0m`);
+        break;
+      case "flappy":
+        if (term._isFlappyActive?.()) return; // game already running
+        term.write("\x1b[2J\x1b[H");
+        if (term._startFlappy) {
+          term._startFlappy();
+          commandRef.current = "";
+          return;
+        }
+        println("\x1b[31mflappy: terminal not ready\x1b[0m");
         break;
       case "sudo":
         println(
@@ -204,8 +215,150 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
       t.write("Last login: " + new Date().toLocaleString() + " / type help?");
       prompt();
 
+      // ----------------------------------------------------------------
+      // FLAPPY (mobile) — tap the terminal to flap, tap after game over
+      // to return to the prompt. Orange bird, green pipes, same vibe
+      // as the desktop version.
+      // ----------------------------------------------------------------
+      let flappy = null;
+
+      const stopFlappy = () => {
+        if (flappy?.timer) clearInterval(flappy.timer);
+        if (term) term._flappyTimer = null;
+        if (term?._flappyTap) {
+          terminalEl.removeEventListener("pointerdown", term._flappyTap);
+          term._flappyTap = null;
+        }
+        flappy = null;
+      };
+
+      const exitFlappy = () => {
+        stopFlappy();
+        t.write("\x1b[2J\x1b[H");
+        t.write("Last login: " + new Date().toLocaleString() + " / type help?");
+        prompt();
+      };
+
+      const startFlappy = () => {
+        if (flappy) return;
+        const W = Math.max(22, Math.min(40, t.cols - 4));
+        const H = 15;
+        const GROUND = H - 1;
+        const BIRD_X = 5;
+        const state = {
+          birdY: Math.floor(H / 2),
+          vel: 0,
+          pipes: [],
+          score: 0,
+          over: false,
+        };
+        const spawnPipe = (x) => {
+          const gap = 4;
+          const gapY = 2 + Math.floor(Math.random() * Math.max(1, GROUND - gap - 2));
+          state.pipes.push({ x, gapY, gap, passed: false });
+        };
+        spawnPipe(W - 6);
+
+        const render = () => {
+          const grid = Array.from({ length: H }, () => Array(W).fill(" "));
+          state.pipes.forEach((p) => {
+            const px = Math.round(p.x);
+            for (let y = 0; y < GROUND; y += 1) {
+              if (y < p.gapY || y >= p.gapY + p.gap) {
+                for (let dx = 0; dx < 2; dx += 1) {
+                  const x = px + dx;
+                  if (x >= 0 && x < W) grid[y][x] = "P";
+                }
+              }
+            }
+          });
+          const by = Math.round(state.birdY);
+          if (by >= 0 && by < GROUND) grid[by][BIRD_X] = "B";
+          for (let x = 0; x < W; x += 1) grid[GROUND][x] = "=";
+
+          const out = [`\x1b[2J\x1b[H\x1b[38;2;242;100;44m SCORE ${state.score} \x1b[0m`];
+          grid.forEach((row) => {
+            let line = "";
+            row.forEach((ch) => {
+              if (ch === "P") line += "\x1b[38;2;34;197;94m█";
+              else if (ch === "B") line += "\x1b[1;38;2;242;100;44m▓";
+              else if (ch === "=") line += "\x1b[38;2;113;113;122m░";
+              else line += " ";
+            });
+            out.push(line + "\x1b[0m");
+          });
+          if (state.over) {
+            out.push("");
+            out.push("\x1b[1;38;2;242;100;44m GAME OVER — tap to exit \x1b[0m");
+          } else {
+            out.push("\x1b[38;2;242;100;44m TAP to flap \x1b[0m");
+          }
+          t.write(out.join("\r\n"));
+        };
+
+        const tick = () => {
+          if (state.over) return;
+          state.vel += 0.42;
+          state.birdY += state.vel;
+          if (state.birdY < 0) {
+            state.birdY = 0;
+            state.over = true;
+          }
+          state.pipes.forEach((p) => {
+            p.x -= 0.5;
+            if (!p.passed && p.x + 2 < BIRD_X) {
+              p.passed = true;
+              state.score += 1;
+            }
+          });
+          state.pipes = state.pipes.filter((p) => p.x > -3);
+          const last = state.pipes[state.pipes.length - 1];
+          if (!last || last.x < W - 14) spawnPipe(W - 2);
+          const by = Math.round(state.birdY);
+          if (by >= GROUND) {
+            state.birdY = GROUND - 0.01;
+            state.over = true;
+          } else {
+            for (const p of state.pipes) {
+              const px = Math.round(p.x);
+              if (BIRD_X >= px && BIRD_X < px + 2 && (by < p.gapY || by >= p.gapY + p.gap)) {
+                state.over = true;
+                break;
+              }
+            }
+          }
+          if (state.over) clearInterval(flappy.timer);
+          render();
+        };
+
+        render();
+        flappy = { timer: setInterval(tick, 120), state };
+        if (term) term._flappyTimer = flappy.timer;
+        t._startFlappy = startFlappy;
+        t._isFlappyActive = () => Boolean(flappy);
+        term._flappyTap = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!flappy) return;
+          if (flappy.state.over) exitFlappy();
+          else flappy.state.vel = -1.2;
+        };
+        terminalEl.addEventListener("pointerdown", term._flappyTap);
+      };
+
       t.onData((data) => {
         const code = data.charCodeAt(0);
+
+        // Flappy owns the keyboard while active.
+        if (flappy) {
+          if (data === "q" || data === "Q") {
+            exitFlappy();
+            return;
+          }
+          if (flappy.state.over) return; // tap to exit
+          if (data === " " || data === "w" || data === "W") flappy.state.vel = -1.2;
+          return;
+        }
 
         if (code === 13) {
           const cmd = commandRef.current.trim();
@@ -240,6 +393,9 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
               );
               println(
                 "\x1b[1;38;2;16;185;129mprojects\x1b[0m  \x1b[38;2;75;85;99m- Display portfolio projects\x1b[0m",
+              );
+              println(
+                "\x1b[1;38;2;242;100;44mflappy\x1b[0m    \x1b[38;2;75;85;99m- Play ascii flappy bird (tap)\x1b[0m",
               );
               println(
                 "\x1b[1;38;2;16;185;129msudo\x1b[0m      \x1b[38;2;75;85;99m- Run superuser command\x1b[0m",
@@ -290,6 +446,10 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
                 println("");
               });
               break;
+            case "flappy":
+              t.write("\x1b[2J\x1b[H");
+              startFlappy();
+              break;
             default:
               println(`\x1b[31mzsh: command not found: ${baseCmd}\x1b[0m`);
           }
@@ -318,10 +478,11 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
           fontSize: 11,
           lineHeight: 1.4,
           theme: {
-            background: "#ffffff",
-            foreground: "#333333",
-            cursor: "#333333",
-            selectionBackground: "#b5d5ff",
+            background: "#161618",
+            foreground: "#d4d4d8",
+            cursor: "#f2642c",
+            cursorAccent: "#161618",
+            selectionBackground: "#7c2d12",
           },
         });
 
@@ -383,6 +544,14 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
     return () => {
       clearTimeout(timer);
       resizeObserver.disconnect();
+      if (term?._flappyTimer) {
+        clearInterval(term._flappyTimer);
+        term._flappyTimer = null;
+      }
+      if (term?._flappyTap) {
+        terminalEl.removeEventListener("pointerdown", term._flappyTap);
+        term._flappyTap = null;
+      }
       if (term) {
         term.dispose();
       }
@@ -400,7 +569,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
 
   return (
     <div
-      className="flex-1 w-full bg-white flex flex-col min-h-0 p-4 pb-5"
+      className="flex-1 w-full bg-[#161618] flex flex-col min-h-0 p-4 pb-5"
       style={{ overflow: "hidden" }}
     >
       <style>{`
@@ -431,10 +600,10 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
           gap: 6,
           overflowX: "auto",
           padding: "12px 0 8px",
-          borderTop: "1px solid #e5e5ea",
+          borderTop: "1px solid rgba(255,255,255,0.10)",
           width: "100%",
           flexShrink: 0,
-          background: "#ffffff",
+          background: "#161618",
         }}
         className="scrollbar-none"
       >
@@ -444,9 +613,9 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
             onClick={() => handleShortcutClick(cmd)}
             style={{
               padding: "6px 12px",
-              background: "rgba(0, 0, 0, 0.05)",
-              color: "#333333",
-              border: "1px solid rgba(0, 0, 0, 0.08)",
+              background: "rgba(255, 255, 255, 0.08)",
+              color: "#e4e4e7",
+              border: "1px solid rgba(255, 255, 255, 0.14)",
               borderRadius: 8,
               fontSize: 11,
               fontFamily: "Menlo, Monaco, monospace",
@@ -454,7 +623,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
               whiteSpace: "nowrap",
               transition: "all 0.2s",
             }}
-            className="active:bg-black/10"
+            className="active:bg-white/15"
           >
             {label}
           </button>
