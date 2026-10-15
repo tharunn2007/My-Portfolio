@@ -244,3 +244,22 @@ Stage Summary:
 - Zip deliverable is fresh, verified, and user-downloadable at <preview-url>/portfolio-template.zip (public/ copy).
 - Scheduled QA loop restored (job 461033). No code changes this round.
 - Next: continue with cron-round suggestions (og-image re-encode <300KB, more features/styling polish).
+
+---
+Task ID: 23
+Agent: Z.ai Code (main)
+Task: User GIF as the ONLY animated desktop wallpaper (delete others); minimal portfolio-first dock; rebuild installable zip.
+
+Work Log:
+- Verified user GIF (upload/pasted_image_1792059161516.gif): 1600x900, 54 frames, 60ms, 480KB synthwave pixel-art hacker room. Animated WebP conversion tested -> 1.5MB (3x BIGGER), kept GIF as-is.
+- Wallpaper: installed public/wallpapers/tharunn-wallpaper.gif; DELETED wallpaper.webp..wallpaper6.webp (6 files); base.css body background -> GIF (mobile keeps mobile-wallpaper.webp untouched); removed desktopWallpapers array + wallpaperIndex state + handleChangeWallpaper from Home.jsx; removed "Change Wallpaper..." submenu entirely from DesktopContextMenu.jsx (props, layout vars, JSX block); removed featured.js xcode image ref (dead after wallpaper deletion). Reference sweep = 0 dead refs. Login screen + desktop both show GIF via body background.
+- Dock: kept dockApps as FULL registry (Launchpad/Siri/mobile app grid/window store depend on it); added DEFAULT_DOCK_IDS export to constants/dock.js = [finder, launchpad, safari, terminal, contact, trash] with rationale comments; window.js dockAppIds init from DEFAULT_DOCK_IDS; Dock.jsx separator moved from before "folder" to before "trash" (classic macOS look). Dock: 23 icons -> 6 + separator. Mobile dock/grid untouched by design.
+- App Store featured: removed wallpapers/wallpaper.webp image ref (conditional render -> gradient fallback intact).
+- SANDBOX RESET mid-round (dev server killed, dev.log + node_modules/@gsap gone, package.json+bun.lock reverted to template lacking gsap/@gsap/react/xterm/@xterm/addon-fit/react-pdf/html2canvas/dayjs). Recovery: restored GIF from upload/, recreated /tmp/start-dev.py, bun add (7 packages), restart -> 200. NOTE for future rounds: sandbox resets may revert package.json; upload/ + src/ survive.
+- Browser verify (1440x900): boot + lock screen show blurred GIF; desktop shows animated GIF; dock accessibility snapshot = exactly 6 buttons (Finder, Launchpad, Safari, Terminal, Contact, Trash); desktop context menu has no wallpaper item; login 2026 works.
+- Zip rebuilt: EXCLUDED nested public/portfolio-template.zip (old builds accidentally shipped 13MB zip-in-zip!) and re-encoded og-image 1629x965/1.68MB -> 1200x711/636KB quantized PNG. Result: 721 files, 12.32 MB (was 13.66), md5 1ae9b7ed17465b9aa78a6bf7012ee986, 3 identical copies (root, public/, upload/portfolio-backup-r23.zip), 8/8 content checks PASS (GIF in, old wallpapers out, gsap+react-pdf in package.json, DEFAULT_DOCK_IDS, no wallpaper picker, veriTAS present).
+
+Stage Summary:
+- Desktop = one animated signature wallpaper + 6-icon portfolio-first dock; all apps still reachable via Launchpad/Siri; mobile untouched.
+- Installable zip is 12.32MB, reset-resilient in upload/portfolio-backup-r23.zip, served at /portfolio-template.zip.
+- Still pending user data: X/Twitter, domain, phone, real skills, avatar, resume, project screenshots, gallery.

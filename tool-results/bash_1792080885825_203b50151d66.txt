@@ -1,0 +1,1580 @@
+dev server daemonized
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://21.0.10.244:3000
+- Environments: .env
+✓ Ready in 287ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+○ Compiling / ...
+page: 500
+ GET / 500 in 5.3s (next.js: 5.2s, application-code: 101ms)
+ GET / 500 in 12.9s (next.js: 12.9s, application-code: 20ms)
+gif: 200
+
+stderr:
+$ next dev
+⨯ ./src/hoc/windowWrapper.jsx:2:1
+Module not found: Can't resolve '@gsap/react'
+  1 | import useWindowsStore from "@store/window";
+> 2 | import { useGSAP } from "@gsap/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import gsap from "gsap";
+  4 | import { Draggable } from "gsap/Draggable";
+  5 | import { useRef, useState, useEffect, useMemo } from "react";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/hoc/windowWrapper.jsx [Client Component Browser]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/hoc/windowWrapper.jsx [Client Component SSR]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/dock/hooks/useDock.js:1:1
+Module not found: Can't resolve '@gsap/react'
+> 1 | import { useGSAP } from "@gsap/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 | import gsap from "gsap";
+  3 | import { useRef, useEffect } from "react";
+  4 | import useWindowsStore from "@store/window";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/dock/hooks/useDock.js [Client Component Browser]
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/dock/hooks/useDock.js [Client Component SSR]
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/home/ui/components/Home.jsx:5:1
+Module not found: Can't resolve '@gsap/react'
+  3 | import useLocationStore from "@store/location";
+  4 | import useWindowsStore from "@store/window";
+> 5 | import { useGSAP } from "@gsap/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import gsap from "gsap";
+  7 | import { Draggable } from "gsap/Draggable";
+  8 | import OptimizedImage from "@module/shared/ui/components/OptimizedImage";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/widgets/ui/components/Widgets.jsx:8:1
+Module not found: Can't resolve '@gsap/react'
+   6 | import AnalogClockFace from "./AnalogClockFace";
+   7 | import WEATHER_DATA from "@module/desktop/apps/weather/data/weatherData";
+>  8 | import { useGSAP } from "@gsap/react";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { Draggable } from "gsap/Draggable";
+  10 |
+  11 | const getCalendarDays = (year, month) => {
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/widgets/ui/components/Widgets.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/loading/ui/components/BootScreen.jsx:1:1
+Module not found: Can't resolve '@gsap/react'
+> 1 | import { useGSAP } from "@gsap/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 | import gsap from "gsap";
+  3 | import { useRef, useState, useEffect } from "react";
+  4 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/loading/ui/components/BootScreen.jsx [Client Component Browser]
+    ./src/module/loading/ui/section/LoadingSection.jsx [Client Component Browser]
+    ./src/module/loading/ui/view/LoadingView.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/loading/ui/components/BootScreen.jsx [Client Component SSR]
+    ./src/module/loading/ui/section/LoadingSection.jsx [Client Component SSR]
+    ./src/module/loading/ui/view/LoadingView.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx:4:1
+Module not found: Can't resolve '@xterm/addon-fit'
+  2 | import { Terminal as XTerm } from "xterm";
+  3 | import "xterm/css/xterm.css";
+> 4 | import { FitAddon } from "@xterm/addon-fit";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import {
+  6 |   techStack,
+  7 |   projects,
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx:4:1
+Module not found: Can't resolve '@xterm/addon-fit'
+  2 | import { Terminal as XTerm } from "xterm";
+  3 | import "xterm/css/xterm.css";
+> 4 | import { FitAddon } from "@xterm/addon-fit";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { techStack, projects, OWNER_HANDLE } from "@constants";
+  6 | import useWindowsStore from "@store/window";
+  7 |
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/navbar/hooks/useNavbar.js:2:1
+Module not found: Can't resolve 'dayjs'
+  1 | import useWindowsStore from "@store/window";
+> 2 | import dayjs from "dayjs";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import html2canvas from "html2canvas";
+  4 | import { useEffect, useRef, useState } from "react";
+  5 | import useTimeStore from "@store/time";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/navbar/hooks/useNavbar.js [Client Component Browser]
+    ./src/module/desktop/navbar/ui/components/Navbar.jsx [Client Component Browser]
+    ./src/module/desktop/navbar/ui/view/NavbarView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/navbar/hooks/useNavbar.js [Client Component SSR]
+    ./src/module/desktop/navbar/ui/components/Navbar.jsx [Client Component SSR]
+    ./src/module/desktop/navbar/ui/view/NavbarView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/home/ui/components/MobileOS.jsx:3:1
+Module not found: Can't resolve 'dayjs'
+  1 | import { dockApps } from "@constants";
+  2 | import useWindowsStore from "@store/window";
+> 3 | import dayjs from "dayjs";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { useRef, useState, useEffect } from "react";
+  5 | import useTimeStore from "@store/time";
+  6 | import MobileOSStatusBar from "../../../statusbar/ui/components/MobileOSStatusBar";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/mobile/home/ui/components/MobileOS.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/section/MobileOSSection.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/view/MobileOSView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/mobile/home/ui/components/MobileOS.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/section/MobileOSSection.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/view/MobileOSView.jsx [Client Component SSR]
+    ./src/module/mobile/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/page.jsx:7:1
+Module not found: Can't resolve 'gsap'
+   5 | import Desktop from "@module/desktop";
+   6 | import Mobile from "@module/mobile";
+>  7 | import gsap from "gsap";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { useState, useEffect } from "react";
+   9 | import useWindowsStore from "@store/window";
+  10 | import GlobalAudio from "@module/shared/ui/components/GlobalAudio";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/hoc/windowWrapper.jsx:3:1
+Module not found: Can't resolve 'gsap'
+  1 | import useWindowsStore from "@store/window";
+  2 | import { useGSAP } from "@gsap/react";
+> 3 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { Draggable } from "gsap/Draggable";
+  5 | import { useRef, useState, useEffect, useMemo } from "react";
+  6 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/hoc/windowWrapper.jsx [Client Component Browser]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/hoc/windowWrapper.jsx [Client Component SSR]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/dock/hooks/useDock.js:2:1
+Module not found: Can't resolve 'gsap'
+  1 | import { useGSAP } from "@gsap/react";
+> 2 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import { useRef, useEffect } from "react";
+  4 | import useWindowsStore from "@store/window";
+  5 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/dock/hooks/useDock.js [Client Component Browser]
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/dock/hooks/useDock.js [Client Component SSR]
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/dock/ui/components/Dock.jsx:5:1
+Module not found: Can't resolve 'gsap'
+  3 | import useLocationStore from "@store/location";
+  4 | import { Fragment, useMemo, useState, useRef, useEffect, useCallback } from "react";
+> 5 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import DockIcon from "./DockIcon";
+  7 | import useDock from "../../hooks/useDock";
+  8 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/home/ui/components/Home.jsx:6:1
+Module not found: Can't resolve 'gsap'
+  4 | import useWindowsStore from "@store/window";
+  5 | import { useGSAP } from "@gsap/react";
+> 6 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { Draggable } from "gsap/Draggable";
+  8 | import OptimizedImage from "@module/shared/ui/components/OptimizedImage";
+  9 | import HomeFolder from "./HomeFolder";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/loading/ui/components/BootScreen.jsx:2:1
+Module not found: Can't resolve 'gsap'
+  1 | import { useGSAP } from "@gsap/react";
+> 2 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import { useRef, useState, useEffect } from "react";
+  4 |
+  5 | const BootScreen = ({ onComplete, isMobile: propIsMobile }) => {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/loading/ui/components/BootScreen.jsx [Client Component Browser]
+    ./src/module/loading/ui/section/LoadingSection.jsx [Client Component Browser]
+    ./src/module/loading/ui/view/LoadingView.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/loading/ui/components/BootScreen.jsx [Client Component SSR]
+    ./src/module/loading/ui/section/LoadingSection.jsx [Client Component SSR]
+    ./src/module/loading/ui/view/LoadingView.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/controlcenter/ui/components/MobileOSControlCenter.jsx:2:1
+Module not found: Can't resolve 'gsap'
+  1 | import { useEffect, useState, useRef } from "react";
+> 2 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import useWindowsStore from "@store/window";
+  4 | import {
+  5 |   X,
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/mobile/controlcenter/ui/components/MobileOSControlCenter.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/components/MobileOS.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/section/MobileOSSection.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/view/MobileOSView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/mobile/controlcenter/ui/components/MobileOSControlCenter.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/components/MobileOS.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/section/MobileOSSection.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/view/MobileOSView.jsx [Client Component SSR]
+    ./src/module/mobile/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/page.jsx:12:1
+Module not found: Can't resolve 'gsap/Draggable'
+  10 | import GlobalAudio from "@module/shared/ui/components/GlobalAudio";
+  11 |
+> 12 | import { Draggable } from "gsap/Draggable";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  13 | gsap.registerPlugin(Draggable);
+  14 |
+  15 | export default function Page() {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/hoc/windowWrapper.jsx:4:1
+Module not found: Can't resolve 'gsap/Draggable'
+  2 | import { useGSAP } from "@gsap/react";
+  3 | import gsap from "gsap";
+> 4 | import { Draggable } from "gsap/Draggable";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { useRef, useState, useEffect, useMemo } from "react";
+  6 |
+  7 | const checkDockCollision = () => {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/hoc/windowWrapper.jsx [Client Component Browser]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/hoc/windowWrapper.jsx [Client Component SSR]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/home/ui/components/Home.jsx:7:1
+Module not found: Can't resolve 'gsap/Draggable'
+   5 | import { useGSAP } from "@gsap/react";
+   6 | import gsap from "gsap";
+>  7 | import { Draggable } from "gsap/Draggable";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import OptimizedImage from "@module/shared/ui/components/OptimizedImage";
+   9 | import HomeFolder from "./HomeFolder";
+  10 | import DesktopShortcut from "./DesktopShortcut";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/widgets/ui/components/Widgets.jsx:9:1
+Module not found: Can't resolve 'gsap/Draggable'
+   7 | import WEATHER_DATA from "@module/desktop/apps/weather/data/weatherData";
+   8 | import { useGSAP } from "@gsap/react";
+>  9 | import { Draggable } from "gsap/Draggable";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 |
+  11 | const getCalendarDays = (year, month) => {
+  12 |   const firstDay = new Date(year, month, 1).getDay();
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/widgets/ui/components/Widgets.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/navbar/hooks/useNavbar.js:3:1
+Module not found: Can't resolve 'html2canvas'
+  1 | import useWindowsStore from "@store/window";
+  2 | import dayjs from "dayjs";
+> 3 | import html2canvas from "html2canvas";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { useEffect, useRef, useState } from "react";
+  5 | import useTimeStore from "@store/time";
+  6 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/navbar/hooks/useNavbar.js [Client Component Browser]
+    ./src/module/desktop/navbar/ui/components/Navbar.jsx [Client Component Browser]
+    ./src/module/desktop/navbar/ui/view/NavbarView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/navbar/hooks/useNavbar.js [Client Component SSR]
+    ./src/module/desktop/navbar/ui/components/Navbar.jsx [Client Component SSR]
+    ./src/module/desktop/navbar/ui/view/NavbarView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/apps/resume/ui/components/Resume.jsx:5:1
+Module not found: Can't resolve 'react-pdf'
+  3 | import windowWrapper from "@hoc/windowWrapper";
+  4 | import { Download, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
+> 5 | import { Document, Page, pdfjs } from "react-pdf";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import useWindowsStore from "@store/window";
+  7 |
+  8 | // Configure pdfjs worker to render the PDF properly from the local public directory
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/apps/resume/ui/components/Resume.jsx [Client Component Browser]
+    ./src/module/desktop/apps/resume/ui/section/ResumeSection.jsx [Client Component Browser]
+    ./src/module/desktop/apps/resume/ui/view/ResumeView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/apps/resume/ui/components/Resume.jsx:5:1
+Module not found: Can't resolve 'react-pdf'
+  3 | import windowWrapper from "@hoc/windowWrapper";
+  4 | import { Download, ZoomIn, ZoomOut, RefreshCw } from "lucide-react";
+> 5 | import { Document, Page, pdfjs } from "react-pdf";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | // Configure pdfjs worker to render the PDF properly from the local public directory
+  8 | pdfjs.GlobalWorkerOptions.workerSrc = "/vendor/pdf.worker.min.js";
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/mobile/apps/resume/ui/components/Resume.jsx [Client Component Browser]
+    ./src/module/mobile/apps/resume/ui/section/ResumeSection.jsx [Client Component Browser]
+    ./src/module/mobile/apps/resume/ui/view/ResumeView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx:2:1
+Module not found: Can't resolve 'xterm'
+  1 | import { useEffect } from "react";
+> 2 | import { Terminal as XTerm } from "xterm";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import "xterm/css/xterm.css";
+  4 | import { FitAddon } from "@xterm/addon-fit";
+  5 | import {
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx:2:1
+Module not found: Can't resolve 'xterm'
+  1 | import React, { useEffect, useState } from "react";
+> 2 | import { Terminal as XTerm } from "xterm";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import "xterm/css/xterm.css";
+  4 | import { FitAddon } from "@xterm/addon-fit";
+  5 | import { techStack, projects, OWNER_HANDLE } from "@constants";
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx:3:1
+Module not found: Can't resolve 'xterm/css/xterm.css'
+  1 | import { useEffect } from "react";
+  2 | import { Terminal as XTerm } from "xterm";
+> 3 | import "xterm/css/xterm.css";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { FitAddon } from "@xterm/addon-fit";
+  5 | import {
+  6 |   techStack,
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx:3:1
+Module not found: Can't resolve 'xterm/css/xterm.css'
+  1 | import React, { useEffect, useState } from "react";
+  2 | import { Terminal as XTerm } from "xterm";
+> 3 | import "xterm/css/xterm.css";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { FitAddon } from "@xterm/addon-fit";
+  5 | import { techStack, projects, OWNER_HANDLE } from "@constants";
+  6 | import useWindowsStore from "@store/window";
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/hoc/windowWrapper.jsx:2:1
+Module not found: Can't resolve '@gsap/react'
+  1 | import useWindowsStore from "@store/window";
+> 2 | import { useGSAP } from "@gsap/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import gsap from "gsap";
+  4 | import { Draggable } from "gsap/Draggable";
+  5 | import { useRef, useState, useEffect, useMemo } from "react";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/hoc/windowWrapper.jsx [Client Component Browser]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/hoc/windowWrapper.jsx [Client Component SSR]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/dock/hooks/useDock.js:1:1
+Module not found: Can't resolve '@gsap/react'
+> 1 | import { useGSAP } from "@gsap/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 | import gsap from "gsap";
+  3 | import { useRef, useEffect } from "react";
+  4 | import useWindowsStore from "@store/window";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/dock/hooks/useDock.js [Client Component Browser]
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/dock/hooks/useDock.js [Client Component SSR]
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/home/ui/components/Home.jsx:5:1
+Module not found: Can't resolve '@gsap/react'
+  3 | import useLocationStore from "@store/location";
+  4 | import useWindowsStore from "@store/window";
+> 5 | import { useGSAP } from "@gsap/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import gsap from "gsap";
+  7 | import { Draggable } from "gsap/Draggable";
+  8 | import OptimizedImage from "@module/shared/ui/components/OptimizedImage";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/widgets/ui/components/Widgets.jsx:8:1
+Module not found: Can't resolve '@gsap/react'
+   6 | import AnalogClockFace from "./AnalogClockFace";
+   7 | import WEATHER_DATA from "@module/desktop/apps/weather/data/weatherData";
+>  8 | import { useGSAP } from "@gsap/react";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 | import { Draggable } from "gsap/Draggable";
+  10 |
+  11 | const getCalendarDays = (year, month) => {
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/widgets/ui/components/Widgets.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/loading/ui/components/BootScreen.jsx:1:1
+Module not found: Can't resolve '@gsap/react'
+> 1 | import { useGSAP } from "@gsap/react";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 | import gsap from "gsap";
+  3 | import { useRef, useState, useEffect } from "react";
+  4 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/loading/ui/components/BootScreen.jsx [Client Component Browser]
+    ./src/module/loading/ui/section/LoadingSection.jsx [Client Component Browser]
+    ./src/module/loading/ui/view/LoadingView.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/loading/ui/components/BootScreen.jsx [Client Component SSR]
+    ./src/module/loading/ui/section/LoadingSection.jsx [Client Component SSR]
+    ./src/module/loading/ui/view/LoadingView.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx:4:1
+Module not found: Can't resolve '@xterm/addon-fit'
+  2 | import { Terminal as XTerm } from "xterm";
+  3 | import "xterm/css/xterm.css";
+> 4 | import { FitAddon } from "@xterm/addon-fit";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import {
+  6 |   techStack,
+  7 |   projects,
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx:4:1
+Module not found: Can't resolve '@xterm/addon-fit'
+  2 | import { Terminal as XTerm } from "xterm";
+  3 | import "xterm/css/xterm.css";
+> 4 | import { FitAddon } from "@xterm/addon-fit";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { techStack, projects, OWNER_HANDLE } from "@constants";
+  6 | import useWindowsStore from "@store/window";
+  7 |
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/navbar/hooks/useNavbar.js:2:1
+Module not found: Can't resolve 'dayjs'
+  1 | import useWindowsStore from "@store/window";
+> 2 | import dayjs from "dayjs";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import html2canvas from "html2canvas";
+  4 | import { useEffect, useRef, useState } from "react";
+  5 | import useTimeStore from "@store/time";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/navbar/hooks/useNavbar.js [Client Component Browser]
+    ./src/module/desktop/navbar/ui/components/Navbar.jsx [Client Component Browser]
+    ./src/module/desktop/navbar/ui/view/NavbarView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/navbar/hooks/useNavbar.js [Client Component SSR]
+    ./src/module/desktop/navbar/ui/components/Navbar.jsx [Client Component SSR]
+    ./src/module/desktop/navbar/ui/view/NavbarView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/home/ui/components/MobileOS.jsx:3:1
+Module not found: Can't resolve 'dayjs'
+  1 | import { dockApps } from "@constants";
+  2 | import useWindowsStore from "@store/window";
+> 3 | import dayjs from "dayjs";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { useRef, useState, useEffect } from "react";
+  5 | import useTimeStore from "@store/time";
+  6 | import MobileOSStatusBar from "../../../statusbar/ui/components/MobileOSStatusBar";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/mobile/home/ui/components/MobileOS.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/section/MobileOSSection.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/view/MobileOSView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/mobile/home/ui/components/MobileOS.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/section/MobileOSSection.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/view/MobileOSView.jsx [Client Component SSR]
+    ./src/module/mobile/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/page.jsx:7:1
+Module not found: Can't resolve 'gsap'
+   5 | import Desktop from "@module/desktop";
+   6 | import Mobile from "@module/mobile";
+>  7 | import gsap from "gsap";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import { useState, useEffect } from "react";
+   9 | import useWindowsStore from "@store/window";
+  10 | import GlobalAudio from "@module/shared/ui/components/GlobalAudio";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/hoc/windowWrapper.jsx:3:1
+Module not found: Can't resolve 'gsap'
+  1 | import useWindowsStore from "@store/window";
+  2 | import { useGSAP } from "@gsap/react";
+> 3 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { Draggable } from "gsap/Draggable";
+  5 | import { useRef, useState, useEffect, useMemo } from "react";
+  6 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/hoc/windowWrapper.jsx [Client Component Browser]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/hoc/windowWrapper.jsx [Client Component SSR]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/dock/hooks/useDock.js:2:1
+Module not found: Can't resolve 'gsap'
+  1 | import { useGSAP } from "@gsap/react";
+> 2 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import { useRef, useEffect } from "react";
+  4 | import useWindowsStore from "@store/window";
+  5 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/dock/hooks/useDock.js [Client Component Browser]
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/dock/hooks/useDock.js [Client Component SSR]
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/dock/ui/components/Dock.jsx:5:1
+Module not found: Can't resolve 'gsap'
+  3 | import useLocationStore from "@store/location";
+  4 | import { Fragment, useMemo, useState, useRef, useEffect, useCallback } from "react";
+> 5 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import DockIcon from "./DockIcon";
+  7 | import useDock from "../../hooks/useDock";
+  8 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component Browser]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/dock/ui/components/Dock.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/section/DockSection.jsx [Client Component SSR]
+    ./src/module/desktop/dock/ui/view/DockView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/home/ui/components/Home.jsx:6:1
+Module not found: Can't resolve 'gsap'
+  4 | import useWindowsStore from "@store/window";
+  5 | import { useGSAP } from "@gsap/react";
+> 6 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { Draggable } from "gsap/Draggable";
+  8 | import OptimizedImage from "@module/shared/ui/components/OptimizedImage";
+  9 | import HomeFolder from "./HomeFolder";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/loading/ui/components/BootScreen.jsx:2:1
+Module not found: Can't resolve 'gsap'
+  1 | import { useGSAP } from "@gsap/react";
+> 2 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import { useRef, useState, useEffect } from "react";
+  4 |
+  5 | const BootScreen = ({ onComplete, isMobile: propIsMobile }) => {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/loading/ui/components/BootScreen.jsx [Client Component Browser]
+    ./src/module/loading/ui/section/LoadingSection.jsx [Client Component Browser]
+    ./src/module/loading/ui/view/LoadingView.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/loading/ui/components/BootScreen.jsx [Client Component SSR]
+    ./src/module/loading/ui/section/LoadingSection.jsx [Client Component SSR]
+    ./src/module/loading/ui/view/LoadingView.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/controlcenter/ui/components/MobileOSControlCenter.jsx:2:1
+Module not found: Can't resolve 'gsap'
+  1 | import { useEffect, useState, useRef } from "react";
+> 2 | import gsap from "gsap";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import useWindowsStore from "@store/window";
+  4 | import {
+  5 |   X,
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/mobile/controlcenter/ui/components/MobileOSControlCenter.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/components/MobileOS.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/section/MobileOSSection.jsx [Client Component Browser]
+    ./src/module/mobile/home/ui/view/MobileOSView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/mobile/controlcenter/ui/components/MobileOSControlCenter.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/components/MobileOS.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/section/MobileOSSection.jsx [Client Component SSR]
+    ./src/module/mobile/home/ui/view/MobileOSView.jsx [Client Component SSR]
+    ./src/module/mobile/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/page.jsx:12:1
+Module not found: Can't resolve 'gsap/Draggable'
+  10 | import GlobalAudio from "@module/shared/ui/components/GlobalAudio";
+  11 |
+> 12 | import { Draggable } from "gsap/Draggable";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  13 | gsap.registerPlugin(Draggable);
+  14 |
+  15 | export default function Page() {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/hoc/windowWrapper.jsx:4:1
+Module not found: Can't resolve 'gsap/Draggable'
+  2 | import { useGSAP } from "@gsap/react";
+  3 | import gsap from "gsap";
+> 4 | import { Draggable } from "gsap/Draggable";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { useRef, useState, useEffect, useMemo } from "react";
+  6 |
+  7 | const checkDockCollision = () => {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/hoc/windowWrapper.jsx [Client Component Browser]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/hoc/windowWrapper.jsx [Client Component SSR]
+    ./src/module/desktop/apps/appletv/ui/view/AppleTVView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/home/ui/components/Home.jsx:7:1
+Module not found: Can't resolve 'gsap/Draggable'
+   5 | import { useGSAP } from "@gsap/react";
+   6 | import gsap from "gsap";
+>  7 | import { Draggable } from "gsap/Draggable";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import OptimizedImage from "@module/shared/ui/components/OptimizedImage";
+   9 | import HomeFolder from "./HomeFolder";
+  10 | import DesktopShortcut from "./DesktopShortcut";
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component Browser]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/home/ui/components/Home.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/section/HomeSection.jsx [Client Component SSR]
+    ./src/module/desktop/home/ui/view/HomeView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/widgets/ui/components/Widgets.jsx:9:1
+Module not found: Can't resolve 'gsap/Draggable'
+   7 | import WEATHER_DATA from "@module/desktop/apps/weather/data/weatherData";
+   8 | import { useGSAP } from "@gsap/react";
+>  9 | import { Draggable } from "gsap/Draggable";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 |
+  11 | const getCalendarDays = (year, month) => {
+  12 |   const firstDay = new Date(year, month, 1).getDay();
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/widgets/ui/components/Widgets.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/navbar/hooks/useNavbar.js:3:1
+Module not found: Can't resolve 'html2canvas'
+  1 | import useWindowsStore from "@store/window";
+  2 | import dayjs from "dayjs";
+> 3 | import html2canvas from "html2canvas";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { useEffect, useRef, useState } from "react";
+  5 | import useTimeStore from "@store/time";
+  6 |
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/module/desktop/navbar/hooks/useNavbar.js [Client Component Browser]
+    ./src/module/desktop/navbar/ui/components/Navbar.jsx [Client Component Browser]
+    ./src/module/desktop/navbar/ui/view/NavbarView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+  Client Component SSR:
+    ./src/module/desktop/navbar/hooks/useNavbar.js [Client Component SSR]
+    ./src/module/desktop/navbar/ui/components/Navbar.jsx [Client Component SSR]
+    ./src/module/desktop/navbar/ui/view/NavbarView.jsx [Client Component SSR]
+    ./src/module/desktop/index.jsx [Client Component SSR]
+    ./src/app/page.jsx [Client Component SSR]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/apps/resume/ui/components/Resume.jsx:5:1
+Module not found: Can't resolve 'react-pdf'
+  3 | import windowWrapper from "@hoc/windowWrapper";
+  4 | import { Download, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
+> 5 | import { Document, Page, pdfjs } from "react-pdf";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import useWindowsStore from "@store/window";
+  7 |
+  8 | // Configure pdfjs worker to render the PDF properly from the local public directory
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/apps/resume/ui/components/Resume.jsx [Client Component Browser]
+    ./src/module/desktop/apps/resume/ui/section/ResumeSection.jsx [Client Component Browser]
+    ./src/module/desktop/apps/resume/ui/view/ResumeView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/apps/resume/ui/components/Resume.jsx:5:1
+Module not found: Can't resolve 'react-pdf'
+  3 | import windowWrapper from "@hoc/windowWrapper";
+  4 | import { Download, ZoomIn, ZoomOut, RefreshCw } from "lucide-react";
+> 5 | import { Document, Page, pdfjs } from "react-pdf";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | // Configure pdfjs worker to render the PDF properly from the local public directory
+  8 | pdfjs.GlobalWorkerOptions.workerSrc = "/vendor/pdf.worker.min.js";
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/mobile/apps/resume/ui/components/Resume.jsx [Client Component Browser]
+    ./src/module/mobile/apps/resume/ui/section/ResumeSection.jsx [Client Component Browser]
+    ./src/module/mobile/apps/resume/ui/view/ResumeView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx:2:1
+Module not found: Can't resolve 'xterm'
+  1 | import { useEffect } from "react";
+> 2 | import { Terminal as XTerm } from "xterm";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import "xterm/css/xterm.css";
+  4 | import { FitAddon } from "@xterm/addon-fit";
+  5 | import {
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx:2:1
+Module not found: Can't resolve 'xterm'
+  1 | import React, { useEffect, useState } from "react";
+> 2 | import { Terminal as XTerm } from "xterm";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import "xterm/css/xterm.css";
+  4 | import { FitAddon } from "@xterm/addon-fit";
+  5 | import { techStack, projects, OWNER_HANDLE } from "@constants";
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx:3:1
+Module not found: Can't resolve 'xterm/css/xterm.css'
+  1 | import { useEffect } from "react";
+  2 | import { Terminal as XTerm } from "xterm";
+> 3 | import "xterm/css/xterm.css";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { FitAddon } from "@xterm/addon-fit";
+  5 | import {
+  6 |   techStack,
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/desktop/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/desktop/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/desktop/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx:3:1
+Module not found: Can't resolve 'xterm/css/xterm.css'
+  1 | import React, { useEffect, useState } from "react";
+  2 | import { Terminal as XTerm } from "xterm";
+> 3 | import "xterm/css/xterm.css";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { FitAddon } from "@xterm/addon-fit";
+  5 | import { techStack, projects, OWNER_HANDLE } from "@constants";
+  6 | import useWindowsStore from "@store/window";
+
+
+
+Import trace:
+  Client Component Browser:
+    ./src/module/mobile/apps/terminal/ui/components/TerminalInput.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/components/Terminal.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/section/TerminalSection.jsx [Client Component Browser]
+    ./src/module/mobile/apps/terminal/ui/view/TerminalView.jsx [Client Component Browser]
+    ./src/module/mobile/index.jsx [Client Component Browser]
+    ./src/app/page.jsx [Client Component Browser]
+    ./src/app/page.jsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
