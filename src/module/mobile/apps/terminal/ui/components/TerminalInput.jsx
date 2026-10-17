@@ -3,6 +3,7 @@ import { Terminal as XTerm } from "xterm";
 import "xterm/css/xterm.css";
 import { FitAddon } from "@xterm/addon-fit";
 import { techStack, projects, OWNER_HANDLE } from "@constants";
+import { renderDonutFrame, donutGeometry, bannerWelcomeLines } from "@lib/terminalBanner";
 import useWindowsStore from "@store/window";
 
 const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
@@ -14,6 +15,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
     { label: "techstack", cmd: "techstack" },
     { label: "projects", cmd: "projects" },
     { label: "flappy", cmd: "flappy" },
+    { label: "donut", cmd: "donut" },
     { label: "whoami", cmd: "whoami" },
     { label: "sudo", cmd: "sudo" },
   ];
@@ -108,6 +110,16 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
           return;
         }
         println("\x1b[31mflappy: terminal not ready\x1b[0m");
+        break;
+      case "donut":
+        if (term._isDonutActive?.()) return;
+        term.write("\x1b[2J\x1b[H");
+        if (term._startDonut) {
+          term._startDonut();
+          commandRef.current = "";
+          return;
+        }
+        println("\x1b[31mdonut: terminal not ready\x1b[0m");
         break;
       case "sudo":
         println(
@@ -212,6 +224,13 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         t.write("\r\n" + msg + "\x1b[0m");
       };
 
+      bannerWelcomeLines(`Welcome to the portfolio!`).forEach((line) =>
+        t.writeln(line),
+      );
+      donutGeometry(t.cols) &&
+        renderDonutFrame(1.05, 0.55, donutGeometry(t.cols)).forEach((line) =>
+          t.writeln(` ${line}`),
+        );
       t.write("Last login: " + new Date().toLocaleString() + " / type help?");
       prompt();
 
@@ -346,8 +365,71 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         terminalEl.addEventListener("pointerdown", term._flappyTap);
       };
 
+      // ----------------------------------------------------------------
+      // DONUT (mobile) — same donut.c spin as desktop; tap to drop
+      // back to the shell. Re-run anytime with the `donut` command.
+      // ----------------------------------------------------------------
+      let donut = null;
+
+      const stopDonut = () => {
+        if (donut?.timer) clearInterval(donut.timer);
+        if (term) term._donutTimer = null;
+        if (term?._donutTap) {
+          terminalEl.removeEventListener("pointerdown", term._donutTap);
+          term._donutTap = null;
+        }
+        donut = null;
+      };
+
+      const exitDonut = () => {
+        stopDonut();
+        t.write("\x1b[2J\x1b[H");
+        bannerWelcomeLines(`Welcome to the portfolio!`).forEach((line) => t.writeln(line));
+        renderDonutFrame(1.05, 0.55, donutGeometry(t.cols)).forEach((line) => t.writeln(` ${line}`));
+        t.write("Last login: " + new Date().toLocaleString() + " / type help?");
+        prompt();
+      };
+
+      const startDonut = () => {
+        if (donut) return;
+        const geometry = donutGeometry(t.cols);
+        let A = 1.0;
+        let B = 0.4;
+
+        const render = () => {
+          const out = [
+            `\x1b[2J\x1b[H\x1b[38;2;113;113;122m donut.c — a1k0n tribute \x1b[0m`,
+            "",
+          ];
+          renderDonutFrame(A, B, geometry).forEach((line) => out.push(` ${line}`));
+          out.push("");
+          out.push("\x1b[38;2;113;113;122m tap to exit \x1b[0m");
+          t.write(out.join("\r\n"));
+          A += 0.07;
+          B += 0.035;
+        };
+
+        render();
+        donut = { timer: setInterval(render, 60), geometry };
+        if (term) term._donutTimer = donut.timer;
+        t._startDonut = startDonut;
+        t._isDonutActive = () => Boolean(donut);
+        term._donutTap = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (donut) exitDonut();
+        };
+        terminalEl.addEventListener("pointerdown", term._donutTap);
+      };
+
       t.onData((data) => {
         const code = data.charCodeAt(0);
+
+        // The donut owns the keyboard while spinning — any key exits.
+        if (donut) {
+          if (data !== "") exitDonut();
+          return;
+        }
 
         // Flappy owns the keyboard while active.
         if (flappy) {
@@ -396,6 +478,9 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
               );
               println(
                 "\x1b[1;38;2;242;100;44mflappy\x1b[0m    \x1b[38;2;75;85;99m- Play ascii flappy bird (tap)\x1b[0m",
+              );
+              println(
+                "\x1b[1;38;2;242;100;44mdonut\x1b[0m     \x1b[38;2;75;85;99m- Spin the donut.c ascii torus\x1b[0m",
               );
               println(
                 "\x1b[1;38;2;16;185;129msudo\x1b[0m      \x1b[38;2;75;85;99m- Run superuser command\x1b[0m",
@@ -548,9 +633,17 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         clearInterval(term._flappyTimer);
         term._flappyTimer = null;
       }
+      if (term?._donutTimer) {
+        clearInterval(term._donutTimer);
+        term._donutTimer = null;
+      }
       if (term?._flappyTap) {
         terminalEl.removeEventListener("pointerdown", term._flappyTap);
         term._flappyTap = null;
+      }
+      if (term?._donutTap) {
+        terminalEl.removeEventListener("pointerdown", term._donutTap);
+        term._donutTap = null;
       }
       if (term) {
         term.dispose();

@@ -10,6 +10,7 @@ import HomeFolder from "./HomeFolder";
 import DesktopShortcut from "./DesktopShortcut";
 import DesktopContextMenu from "./DesktopContextMenu";
 import FolderRenameInput from "./FolderRenameInput";
+import FluidWallpaper from "./FluidWallpaper";
 import useWidgetsStore from "@store/widgets";
 
 const projects = locations.work?.children ?? [];
@@ -265,6 +266,8 @@ const Home = () => {
       onDrop={handleDrop}
       onContextMenu={handleDesktopContextMenu}
     >
+      {/* Live paper-print fluid wallpaper (WebGL; static body bg as fallback) */}
+      <FluidWallpaper />
       <ul>
         {visibleProjects.map((project) => (
           <HomeFolder

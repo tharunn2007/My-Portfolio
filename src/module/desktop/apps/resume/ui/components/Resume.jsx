@@ -6,7 +6,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import useWindowsStore from "@store/window";
 
 // Configure pdfjs worker to render the PDF properly from the local public directory
-pdfjs.GlobalWorkerOptions.workerSrc = "/vendor/pdf.worker.min.js";
+pdfjs.GlobalWorkerOptions.workerSrc = "/vendor/pdf.worker.min.mjs";
 
 const Resume = () => {
   const isOpen = useWindowsStore((state) => state.windows.resume?.isOpen);

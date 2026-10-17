@@ -926,9 +926,11 @@ const NavbarControlCenterSection = ({
           <div
             className="w-[600px] border border-white/20 rounded-2xl flex flex-col overflow-hidden text-white transition-all shadow-[0_30px_70px_rgba(0,0,0,0.55),_0_0_0_1px_rgba(255,255,255,0.08)_inset]"
             style={{
-              background: "rgba(30, 30, 30, 0.55)",
-              backdropFilter: "blur(40px) saturate(210%)",
-              WebkitBackdropFilter: "blur(40px) saturate(210%)",
+              background: "rgba(22, 22, 26, 0.82)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow: "0 30px 70px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)",
+              backdropFilter: "blur(14px) saturate(120%)",
+              WebkitBackdropFilter: "blur(14px) saturate(120%)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1044,12 +1046,12 @@ const NavbarControlCenterSection = ({
             <div
               className="rounded-xl p-5 w-[440px] max-w-full select-none animate-in zoom-in-95 duration-200 text-white"
               style={{
-                background: "rgba(30, 30, 30, 0.55)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
+                background: "rgba(22, 22, 26, 0.82)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
                 boxShadow:
-                  "0 12px 30px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.1) inset",
-                backdropFilter: "blur(40px) saturate(210%)",
-                WebkitBackdropFilter: "blur(40px) saturate(210%)",
+                  "0 18px 40px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)",
+                backdropFilter: "blur(14px) saturate(120%)",
+                WebkitBackdropFilter: "blur(14px) saturate(120%)",
               }}
               onClick={(e) => e.stopPropagation()}
             >

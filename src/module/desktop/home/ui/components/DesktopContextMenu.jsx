@@ -213,13 +213,12 @@ const DesktopContextMenu = ({
       style={{
         left: `${left}px`,
         top: `${top}px`,
-        background:
-          "linear-gradient(135deg, rgba(44, 44, 48, 0.62), rgba(26, 26, 30, 0.5) 45%, rgba(38, 38, 44, 0.58))",
-        backdropFilter: "blur(36px) saturate(190%)",
-        WebkitBackdropFilter: "blur(36px) saturate(190%)",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
+        background: "rgba(22, 22, 26, 0.82)",
+        backdropFilter: "blur(14px) saturate(120%)",
+        WebkitBackdropFilter: "blur(14px) saturate(120%)",
+        border: "1px solid rgba(255, 255, 255, 0.1)",
         boxShadow:
-          "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
+          "0 18px 40px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)",
       }}
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
@@ -306,13 +305,12 @@ const DesktopContextMenu = ({
                   top: `${widgetSubmenuOffsetTop}px`,
                   maxHeight: `${Math.max(0, menuBottom - widgetSubmenuTop)}px`,
                   overflowY: "auto",
-                  background:
-                    "linear-gradient(135deg, rgba(44, 44, 48, 0.66), rgba(26, 26, 30, 0.54) 45%, rgba(38, 38, 44, 0.62))",
-                  backdropFilter: "blur(36px) saturate(190%)",
-                  WebkitBackdropFilter: "blur(36px) saturate(190%)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  background: "rgba(22, 22, 26, 0.82)",
+                  backdropFilter: "blur(14px) saturate(120%)",
+                  WebkitBackdropFilter: "blur(14px) saturate(120%)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
                   boxShadow:
-                    "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
+                    "0 18px 40px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)",
                 }}
               >
                 <p className="px-1 pb-2 text-[11px] font-medium text-white/55">Add Widgets</p>
@@ -408,13 +406,12 @@ const DesktopContextMenu = ({
                   openSubmenuLeft ? "right-full -translate-x-1" : "left-full translate-x-1"
                 }`}
                 style={{
-                  background:
-                    "linear-gradient(135deg, rgba(44, 44, 48, 0.66), rgba(26, 26, 30, 0.54) 45%, rgba(38, 38, 44, 0.62))",
-                  backdropFilter: "blur(36px) saturate(190%)",
-                  WebkitBackdropFilter: "blur(36px) saturate(190%)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  background: "rgba(22, 22, 26, 0.82)",
+                  backdropFilter: "blur(14px) saturate(120%)",
+                  WebkitBackdropFilter: "blur(14px) saturate(120%)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
                   boxShadow:
-                    "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
+                    "0 18px 40px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)",
                 }}
               >
                 {projects.map((project) => (
@@ -486,13 +483,12 @@ const DesktopContextMenu = ({
                   openSubmenuLeft ? "right-full -translate-x-1" : "left-full translate-x-1"
                 }`}
                 style={{
-                  background:
-                    "linear-gradient(135deg, rgba(44, 44, 48, 0.66), rgba(26, 26, 30, 0.54) 45%, rgba(38, 38, 44, 0.62))",
-                  backdropFilter: "blur(36px) saturate(190%)",
-                  WebkitBackdropFilter: "blur(36px) saturate(190%)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  background: "rgba(22, 22, 26, 0.82)",
+                  backdropFilter: "blur(14px) saturate(120%)",
+                  WebkitBackdropFilter: "blur(14px) saturate(120%)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
                   boxShadow:
-                    "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
+                    "0 18px 40px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)",
                 }}
               >
                 {[

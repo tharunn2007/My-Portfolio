@@ -15,9 +15,8 @@ import {
 } from "@constants";
 import { profile } from "@constants/profile";
 import {
-  buildClaudeBanner,
-  buildBlockBanner,
-  bannerColumns,
+  renderDonutFrame,
+  donutGeometry,
   bannerWelcomeLines,
   BANNER_COLORS,
 } from "@lib/terminalBanner";
@@ -35,8 +34,6 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
     let term = null;
     let fitAddon = null;
     let isOpened = false;
-    let bannerShown = false;
-    let minBannerCols = 62;
     let printBanner = null;
 
     const setupHandlers = (t) => {
@@ -48,25 +45,68 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         t.write("\r\n" + msg + "\x1b[0m");
       };
 
-      const claudeBanner = buildClaudeBanner(OWNER_FIRST_NAME);
-      minBannerCols = Math.max(52, bannerColumns(OWNER_FIRST_NAME));
+      // ------------------------------------------------------------------
+      // DONUT BANNER — Andy Sloane (a1k0n) donut.c tribute, scaled down.
+      // Boot: welcome pill + a spinning donut takeover; any key drops to
+      // the shell, which keeps a frozen donut frame as the banner. The
+      // `donut` command re-spins it anytime.
+      // ------------------------------------------------------------------
+      let donut = null; // { timer, geometry }
+
+      const staticDonutFrame = (terminal) => {
+        const geometry = donutGeometry(terminal.cols);
+        renderDonutFrame(1.05, 0.55, geometry).forEach((line) => terminal.writeln(` ${line}`));
+      };
 
       printBanner = (terminal) => {
-        if (terminal.cols >= minBannerCols) {
-          bannerWelcomeLines(`Welcome to ${OWNER_FIRST_NAME}'s portfolio!`).forEach((line) =>
-            terminal.writeln(line),
-          );
-          claudeBanner.rows.forEach((line) => terminal.writeln(line));
-          bannerShown = true;
-        } else {
-          buildBlockBanner(OWNER_FIRST_NAME).forEach((line) => terminal.writeln(orange(line)));
-          bannerShown = false;
-        }
+        bannerWelcomeLines(`Welcome to ${OWNER_FIRST_NAME}'s portfolio!`).forEach((line) =>
+          terminal.writeln(line),
+        );
+        staticDonutFrame(terminal);
         terminal.write("Last login: " + new Date().toLocaleString() + " / help?");
         prompt();
       };
 
+      const stopDonut = () => {
+        if (donut?.timer) clearInterval(donut.timer);
+        if (term) term._donutTimer = null;
+        donut = null;
+      };
+
+      const exitDonut = () => {
+        stopDonut();
+        t.write("\x1b[2J\x1b[H");
+        printBanner(t);
+      };
+
+      const startDonut = () => {
+        if (donut) return;
+        const geometry = donutGeometry(t.cols);
+        let A = 1.0;
+        let B = 0.4;
+
+        const render = () => {
+          const out = [
+            `\x1b[2J\x1b[H\x1b[38;2;113;113;122m  donut.c — Andy Sloane tribute  \x1b[0m`,
+            "",
+          ];
+          renderDonutFrame(A, B, geometry).forEach((line) => out.push(` ${line}`));
+          out.push("");
+          out.push("\x1b[38;2;113;113;122m  press any key for the shell…\x1b[0m");
+          t.write(out.join("\r\n"));
+          A += 0.07;
+          B += 0.035;
+        };
+
+        render();
+        donut = { timer: setInterval(render, 50), geometry };
+        if (term) term._donutTimer = donut.timer;
+      };
+
       printBanner(t);
+
+      // Boot splash — donut spins until the first keystroke.
+      if (t.cols >= 26) startDonut();
 
       // ------------------------------------------------------------------
       // FLAPPY — playable ascii flappy bird right inside the terminal.
@@ -241,6 +281,12 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
       };
 
       t.onData((data) => {
+        // The donut owns the keyboard while spinning — any key exits.
+        if (donut) {
+          if (data !== "") exitDonut();
+          return;
+        }
+
         // Flappy takes over the keyboard while active.
         if (flappy) {
           if (data === "q" || data === "Q") {
@@ -302,6 +348,9 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
               );
               println(
                 `${orange("flappy")}    \x1b[38;2;75;85;99m- Play ascii flappy bird\x1b[0m`,
+              );
+              println(
+                `${orange("donut")}     \x1b[38;2;75;85;99m- Spin the donut.c ascii torus\x1b[0m`,
               );
               println(
                 "\x1b[1;38;2;16;185;129msudo\x1b[0m      \x1b[38;2;75;85;99m- Run superuser command\x1b[0m",
@@ -374,6 +423,10 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
               t.write("\x1b[2J\x1b[H");
               startFlappy();
               break;
+            case "donut":
+              t.write("\x1b[2J\x1b[H");
+              startDonut();
+              break;
             default:
               println(`\x1b[31mzsh: command not found: ${baseCmd}\x1b[0m`);
           }
@@ -433,7 +486,6 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
 
     tryInit();
 
-    let resizeTimer = null;
     const resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
         const { width, height } = entry.contentRect;
@@ -447,18 +499,6 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         } catch {
           /* empty */
         }
-
-        // Debounced banner toggle on resize (skip while flappy is running).
-        if (resizeTimer) clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          if (!term || !printBanner || term._flappyTimer) return;
-          const shouldShow = term.cols >= minBannerCols;
-          if (shouldShow !== bannerShown) {
-            term.reset();
-            commandRef.current = "";
-            printBanner(term);
-          }
-        }, 200);
       }
     });
 
@@ -485,6 +525,10 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
       if (term?._flappyTimer) {
         clearInterval(term._flappyTimer);
         term._flappyTimer = null;
+      }
+      if (term?._donutTimer) {
+        clearInterval(term._donutTimer);
+        term._donutTimer = null;
       }
       if (term) {
         term.dispose();

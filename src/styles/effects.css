@@ -6,23 +6,15 @@ body.theme-dark {
   filter: saturate(1) brightness(1);
 }
 
-/* ─── Apple "Liquid Glass" utility (macOS Tahoe / iOS 26 style) ───
-   Reusable treatment for floating surfaces: context menus, widgets,
-   control center, spotlight, tooltips, dynamic island. Apply per
+/* ─── Matte Translucent utility (readability-first, replaces Liquid Glass) ───
+   Flat, calm frosted panels: modest blur, no specular sheen. Apply per
    surface and adapt opacity/border to context. */
 .liquid-glass {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.16),
-    rgba(255, 255, 255, 0.06) 45%,
-    rgba(255, 255, 255, 0.1)
-  );
-  backdrop-filter: blur(36px) saturate(190%);
-  -webkit-backdrop-filter: blur(36px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(24, 24, 28, 0.78);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
     0 18px 48px rgba(0, 0, 0, 0.4),
     0 4px 14px rgba(0, 0, 0, 0.22);
 }
@@ -30,18 +22,11 @@ body.theme-dark {
 /* Darker variant for menus/popovers that need more contrast over
    bright wallpaper areas. */
 .liquid-glass-dark {
-  background: linear-gradient(
-    135deg,
-    rgba(44, 44, 48, 0.62),
-    rgba(26, 26, 30, 0.5) 45%,
-    rgba(38, 38, 44, 0.58)
-  );
-  backdrop-filter: blur(36px) saturate(190%);
-  -webkit-backdrop-filter: blur(36px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(18, 18, 22, 0.86);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.07),
     0 18px 48px rgba(0, 0, 0, 0.45),
     0 4px 14px rgba(0, 0, 0, 0.25);
 }

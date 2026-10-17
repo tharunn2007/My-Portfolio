@@ -10,20 +10,19 @@ import { useGSAP } from "@gsap/react";
 import { Draggable } from "gsap/Draggable";
 
 // ---------------------------------------------------------------------------
-// GitHub contribution heatmap — temperature-style cool gradient.
+// GitHub contribution heatmap — GitHub's official green palette (dark UI).
 // Data: live GitHub contributions (jogruber API) with a deterministic
 // seeded fallback so the widget always looks alive even offline.
 // ---------------------------------------------------------------------------
 const GITHUB_USER = (GITHUB_PROFILE || "https://github.com/tharunn2007").replace(/\/$/, "").split("/").pop() || "tharunn2007";
 
-// Temperature ramp: cold blue -> cyan -> lime -> amber -> hot red.
+// GitHub dark-theme contribution scale: empty → #0e4429 → #006d32 → #26a641 → #39d353.
 const HEAT_COLORS = [
-  "#27272a", // 0 — no activity
-  "#1d4ed8", // 1 — cold blue
-  "#06b6d4", // 2 — cyan
-  "#84cc16", // 3 — lime
-  "#eab308", // 4 — amber
-  "#ef4444", // 5 — hot red
+  "#161b22", // 0 — no contributions
+  "#0e4429", // 1
+  "#006d32", // 2
+  "#26a641", // 3
+  "#39d353", // 4 — most contributions
 ];
 
 const HEAT_WEEKS = 26;
@@ -48,13 +47,12 @@ const seededDays = (days) => {
     const r = rand();
     const weekendFactor = dow === 0 || dow === 6 ? 0.62 : 1;
     let level = 0;
-    if (r < 0.34 * weekendFactor) level = 0;
-    else if (r < 0.55 * weekendFactor) level = 1;
-    else if (r < 0.72 * weekendFactor) level = 2;
-    else if (r < 0.86 * weekendFactor) level = 3;
-    else if (r < 0.96) level = 4;
-    else level = 5;
-    return { date, level, count: level === 0 ? 0 : level * 2 };
+    if (r < 0.35 * weekendFactor) level = 0;
+    else if (r < 0.57 * weekendFactor) level = 1;
+    else if (r < 0.73 * weekendFactor) level = 2;
+    else if (r < 0.87 * weekendFactor) level = 3;
+    else level = 4;
+    return { date, level, count: level === 0 ? 0 : level * 3 };
   });
 };
 
@@ -74,7 +72,7 @@ const GithubHeatmapWidget = () => {
         if (!mounted || !Array.isArray(data?.contributions)) return;
         const mapped = data.contributions.slice(-HEAT_WEEKS * 7).map((c) => ({
           date: new Date(`${c.date}T00:00:00`),
-          level: Math.min(4, c.level) === 0 ? 0 : Math.min(5, c.level + 1),
+          level: Math.max(0, Math.min(4, c.level)),
           count: c.count || 0,
         }));
         if (mapped.length) setDays(mapped);
@@ -128,7 +126,7 @@ const GithubHeatmapWidget = () => {
     >
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#f2642c]" />
+          <span className="inline-block h-2 w-2 rounded-full bg-[#39d353]" />
           @{GITHUB_USER}
         </span>
         <span className="text-[10px] text-white/55">{total} contributions</span>
@@ -165,7 +163,7 @@ const GithubHeatmapWidget = () => {
                   width: `${cell}px`,
                   height: `${cell}px`,
                   backgroundColor: HEAT_COLORS[day.level] ?? HEAT_COLORS[0],
-                  boxShadow: day.level > 0 ? `0 0 6px ${HEAT_COLORS[day.level]}55` : "none",
+                  boxShadow: day.level > 0 ? `0 0 5px ${HEAT_COLORS[day.level]}40` : "none",
                 }}
               />
             ))}
@@ -483,12 +481,11 @@ const WidgetContextMenu = ({ menu, onClose, onRemove, onResize, onOpen, size }) 
       style={{
         left,
         top,
-        background:
-          "linear-gradient(135deg, rgba(44, 44, 48, 0.66), rgba(26, 26, 30, 0.54) 45%, rgba(38, 38, 44, 0.62))",
-        backdropFilter: "blur(36px) saturate(190%)",
-        WebkitBackdropFilter: "blur(36px) saturate(190%)",
+        background: "rgba(22, 22, 26, 0.86)",
+        backdropFilter: "blur(14px) saturate(120%)",
+        WebkitBackdropFilter: "blur(14px) saturate(120%)",
         boxShadow:
-          "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.07), 0 18px 48px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.28)",
+          "0 18px 40px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)",
       }}
       onPointerDown={(event) => event.stopPropagation()}
       onContextMenu={(event) => {

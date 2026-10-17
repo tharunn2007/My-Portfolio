@@ -51,7 +51,8 @@ body {
   width: 100dvw;
   overflow: hidden;
   height: 100dvh;
-  background-image: url("/wallpapers/tharunn-wallpaper.gif");
+  background-image: url("/wallpapers/paper-print.jpg");
+  background-color: #0c0c0e;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
