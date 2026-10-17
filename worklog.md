@@ -340,3 +340,21 @@ Stage Summary:
 - Round 25 delivered: donut.c rolling banner (desktop+mobile), GitHub-green heatmap, matte translucent UI, real resume PDF w/ halftone header (react-pdf worker fix), live cursor-reactive paper-print fluid wallpaper.
 - Zip: /portfolio-template.zip (md5 1705f093dee1961b1016c254f758f208). Cron webDevReview job 463538 active.
 - Pending user data: X/Twitter, domain, phone, real skills list, avatar, project screenshots, gallery. User may want light-paper variant of wallpaper (shader ink/paper colors are one-line flips).
+
+---
+Task ID: 25-deliver
+Agent: Z.ai Code (main)
+Task: User asked "give me downloadable zip file" — confirm Round 25 state intact and hand over the zip.
+
+Work Log:
+- Worklog review confirmed Round 25 fully implemented (25/25-a..e) with zip md5 1705f093dee1961b1016c254f758f208.
+- Zip integrity: 3 copies (root, public/, upload/portfolio-backup-r25.zip) identical, 13,323,494 bytes, 722 files, `unzip -t` zero errors.
+- HTTP: GET /portfolio-template.zip -> 200 (Accept-Ranges bytes), root / -> 200.
+- agent-browser live walkthrough (fresh session): lock screen -> Enter -> keyboard type 2026 -> desktop OK. Verified: fluid paper-print halftone wallpaper rendering; heatmap widget GitHub-green with 924 live contributions + less/more legend; dock 6 translucent icons. Terminal: donut.c boot ("donut.c — Andy Sloane tribute"), two frames differ (animating), keypress -> green welcome pill + frozen donut + shell prompt. Resume app: PDF renders with halftone band header, Tharunn D / Aspiring Data Engineer, DOB 2/2/2007, expertise Python AWS Azure Pandas SQL Git Databricks, employment history — react-pdf worker fix holding.
+- dev.log: only one stale Fast-Refresh warning from earlier hot reloads; no runtime errors during walkthrough.
+- cron: old job 463538 found DISABLED ("exec limits exceeded") -> deleted, recreated with Round 25 context -> new job_id 465025 (fixed_rate 900s, Asia/Calcutta).
+- No code changes this round.
+
+Stage Summary:
+- Round 25 verified live end-to-end; zip fresh and identical across 3 copies (md5 1705f093dee1961b1016c254f758f208). Cron webDevReview active as job 465025.
+- Pending user data unchanged: X/Twitter, domain, phone, real skills list, avatar, project screenshots, gallery photos.
