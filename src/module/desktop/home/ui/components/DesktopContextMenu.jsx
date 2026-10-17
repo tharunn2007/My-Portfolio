@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { WIDGET_OPTIONS } from "@store/widgets";
 import useTimeStore from "@store/time";
+import { PORTFOLIO_ZIP_URL } from "@constants";
 import WEATHER_DATA from "@module/desktop/apps/weather/data/weatherData";
 import AnalogClockFace from "@module/desktop/widgets/ui/components/AnalogClockFace";
 
@@ -495,6 +496,17 @@ const DesktopContextMenu = ({
                   { label: "Projects", action: onOpenProjects },
                   { label: "Contact", action: () => onOpenApp("contact") },
                   { label: "Resume", action: () => onOpenApp("resume") },
+                  {
+                    label: "Download Portfolio ZIP",
+                    action: () => {
+                      const link = document.createElement("a");
+                      link.href = PORTFOLIO_ZIP_URL;
+                      link.download = "Tharunn_macos-portfolio.zip";
+                      document.body.appendChild(link);
+                      link.click();
+                      link.remove();
+                    },
+                  },
                 ].map(({ label, action }) => (
                   <button
                     key={label}

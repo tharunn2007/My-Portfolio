@@ -39,6 +39,7 @@ export const profile = {
   phone: "+00 0000000000", // TODO: add phone number (optional)
   avatar: "/contacts/avatars/avatar.webp", // Drop your photo at public/contacts/avatars/avatar.webp
   resumeUrl: "/documents/resume.pdf", // Drop your resume at public/documents/resume.pdf
+  portfolioZipUrl: "/portfolio-template.zip", // Downloadable source of this portfolio (public/portfolio-template.zip)
 };
 
 // Social links — used in the navbar, Safari bookmarks, Siri and the assistant.

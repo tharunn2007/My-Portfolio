@@ -6,10 +6,21 @@ import {
   TWITTER_URL,
   projects,
   RESUME_URL,
+  PORTFOLIO_ZIP_URL,
   OWNER_FIRST_NAME,
   PORTFOLIO_APP_NAME,
   EMAIL,
 } from "@constants";
+
+// Shared download helper — mirrors the browser's native save behaviour.
+const triggerDownload = (href, filename) => {
+  const link = document.createElement("a");
+  link.href = href;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+};
 
 const NavbarAppMenu = ({ activeAppName, openWindow, isAppleMenuOpen, setIsAppleMenuOpen }) => {
   const { setAboutPortfolioOpen, setWindowData, windows } = useWindowsStore();
@@ -264,6 +275,11 @@ const NavbarAppMenu = ({ activeAppName, openWindow, isAppleMenuOpen, setIsAppleM
             link.download = `${OWNER_FIRST_NAME}_Resume.pdf`;
             link.click();
           },
+        },
+        {
+          label: "Download Portfolio ZIP",
+          meta: "13 MB",
+          onClick: () => triggerDownload(PORTFOLIO_ZIP_URL, `${OWNER_FIRST_NAME}_macos-portfolio.zip`),
         },
       ],
       [

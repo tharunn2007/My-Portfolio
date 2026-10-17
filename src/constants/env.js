@@ -11,6 +11,7 @@ export const OWNER_FIRST_NAME = profile.firstName;
 export const OWNER_HANDLE = profile.handle;
 export const AVATAR_URL = profile.avatar;
 export const RESUME_URL = profile.resumeUrl;
+export const PORTFOLIO_ZIP_URL = profile.portfolioZipUrl;
 export const OWNER_LOCATION = profile.location;
 
 export const GITHUB_PROFILE = socialLinks.github;

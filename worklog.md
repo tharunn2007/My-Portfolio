@@ -358,3 +358,26 @@ Work Log:
 Stage Summary:
 - Round 25 verified live end-to-end; zip fresh and identical across 3 copies (md5 1705f093dee1961b1016c254f758f208). Cron webDevReview active as job 465025.
 - Pending user data unchanged: X/Twitter, domain, phone, real skills list, avatar, project screenshots, gallery photos.
+
+---
+Task ID: 25-fix-download
+Agent: Z.ai Code (main)
+Task: User reported "why I couldnt download" — diagnose and fix zip download UX.
+
+Work Log:
+- Diagnosis: dev server + endpoint healthy (GET /portfolio-template.zip -> 200, file intact); root cause = NO in-app download entry anywhere (grep src/ for portfolio-template.zip = 0 matches) — user had no clickable way to get the zip from the preview panel.
+- Fix — two visible in-app download entries using the app's native <a download> click pattern:
+  1. src/constants/profile.js: added profile.portfolioZipUrl = "/portfolio-template.zip" (single source of truth).
+  2. src/constants/env.js: export const PORTFOLIO_ZIP_URL = profile.portfolioZipUrl (re-exported via @constants barrel "export * from ./env").
+  3. NavbarAppMenu.jsx: Resume dropdown gains "Download Portfolio ZIP" (meta "13 MB") next to "Download PDF Resume"; shared triggerDownload helper (append to body -> click -> remove) added at module scope.
+  4. DesktopContextMenu.jsx: Quick Open submenu gains "Download Portfolio ZIP" (4th item after Projects/Contact/Resume).
+- Verified in browser (agent-browser): Resume dropdown shows "Download Portfolio ZIP 13 MB"; Quick Open submenu shows it too (React hover needs mouseover dispatch, not mouseenter); `agent-browser download` clicked the menuitem and saved /tmp/test-download.zip = md5 1705f093dee1961b1016c254f758f208 (pre-rebuild zip), proving end-to-end click->download works.
+- Zip rebuilt with ORIGINAL structure (first attempt lacked macos-portfolio/ prefix + prisma/ + mini-services/ + Caddyfile — caught by diffing against upload/portfolio-backup-r25.zip and corrected): prefix macos-portfolio/, 9 root files (package.json bun.lock next.config.mjs postcss.config.mjs eslint.config.js jsconfig.json LICENSE README.md Caddyfile), prisma/, mini-services/, public/ + src/ minus zips/logs = 722 files.
+- New zip x3 identical copies (root, public/portfolio-template.zip, upload/portfolio-backup-r25b.zip): 13,318,908 bytes, md5 60e7e48e4a930ec0e62c2b7326ef2975, `unzip -t` clean, name-list diff vs r25 = zero path changes (content-only diff), zip content grep confirms new "Download Portfolio ZIP" + portfolioZipUrl code inside.
+- Final re-verify after rebuild: endpoint Content-Length 13318908; fresh browser session -> login 2026 -> Resume menu -> agent-browser download -> md5 60e7e48e4a930ec0e62c2b7326ef2975 MATCHES.
+- Lint: 0 errors (61 warnings, +1 pre-existing in MobileNotch.jsx untouched by this round).
+
+Stage Summary:
+- Download UX fixed: user can now get the zip by clicking Resume -> "Download Portfolio ZIP" (or right-click desktop -> Quick Open -> "Download Portfolio ZIP") directly inside the preview — no URL typing needed.
+- Zip r25b: 722 files, 13,318,908 bytes, md5 60e7e48e4a930ec0e62c2b7326ef2975, 3 identical copies.
+- NOTE for zip rebuilds: structure = macos-portfolio/ prefix + the 9 root files + prisma/ + mini-services/ + public/ + src/, exclude *.zip/*.log; always diff file list against previous backup zip before shipping.
