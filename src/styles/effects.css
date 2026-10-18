@@ -1,0 +1,103 @@
+body.theme-light {
+  filter: saturate(1.05) brightness(1.08);
+}
+
+body.theme-dark {
+  filter: saturate(1) brightness(1);
+}
+
+/* ─── Matte Translucent utility (readability-first, replaces Liquid Glass) ───
+   Flat, calm frosted panels: modest blur, no specular sheen. Apply per
+   surface and adapt opacity/border to context. */
+.liquid-glass {
+  background: rgba(24, 24, 28, 0.78);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.4),
+    0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+/* Darker variant for menus/popovers that need more contrast over
+   bright wallpaper areas. */
+.liquid-glass-dark {
+  background: rgba(18, 18, 22, 0.86);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.45),
+    0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(255, 170, 0, 0.15);
+  pointer-events: none;
+  z-index: 9999999;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+body.night-light-active::after {
+  opacity: 1;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  pointer-events: none;
+  z-index: 9999998;
+  opacity: calc((100 - var(--system-brightness, 100)) / 130);
+  transition: opacity 80ms ease-out;
+}
+
+/* Notes Rich Editor Lists Override */
+.notes-content-area ul {
+  list-style-type: disc !important;
+  margin-left: 1.5rem !important;
+  padding-left: 0.25rem !important;
+}
+
+.notes-content-area ol {
+  list-style-type: decimal !important;
+  margin-left: 1.5rem !important;
+  padding-left: 0.25rem !important;
+}
+
+.notes-content-area li {
+  margin-bottom: 0.25rem !important;
+  display: list-item !important;
+}
+
+@keyframes modalScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-modal-pop {
+  animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* contentEditable empty state placeholder support */
+[contentEditable]:empty:before {
+  content: attr(data-placeholder);
+  color: #a1a1aa;
+  cursor: text;
+}

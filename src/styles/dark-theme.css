@@ -1,0 +1,515 @@
+/* ============================================================================
+   DARK THEME (theme-dark) — "everything in dark mode"
+   ----------------------------------------------------------------------------
+   body.theme-dark is applied by default (store window.systemSettings.darkMode
+   = true, toggled by useNavbar). This file darkens every major app surface by
+   remapping the hardcoded light Tailwind utilities *inside each window
+   section* (windowWrapper gives every window a section#<windowKey>).
+
+   Scope rules:
+   - Full flip:   #settings #safari #finder #terminal #photos #txtfile #imgfile #resume
+   - Chrome only: #notes (the note paper area stays light — authentic Notes)
+   - Reader mode inside Safari keeps its own theme system (its root carries
+     .select-text, which is excluded below).
+   - theme-light stays 100% untouched: every rule here is behind body.theme-dark.
+
+   Palette (consistent across apps):
+   - window chrome/titlebar #161618 · sidebar #1c1c20 · surface #232326
+   - raised #2a2a2e · hover #2e2e34 · borders rgba(255,255,255,0.08–0.14)
+   - text white/92 primary · white/60 secondary · white/45 tertiary
+   - accents stay per-app; form controls follow via color-scheme: dark
+   ========================================================================== */
+
+body.theme-dark {
+  color-scheme: dark;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   1. Shared "About <App>" modals — every app reuses bg-[#f5f5f7]/95
+   ──────────────────────────────────────────────────────────────────────────── */
+body.theme-dark .bg-\[\#f5f5f7\]\/95 {
+  background-color: rgba(24, 24, 27, 0.94) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 24px 60px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.theme-dark .bg-\[\#f5f5f7\]\/95 .text-gray-900 {
+  color: rgba(255, 255, 255, 0.94) !important;
+}
+body.theme-dark .bg-\[\#f5f5f7\]\/95 .text-gray-800 {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+body.theme-dark .bg-\[\#f5f5f7\]\/95 .text-gray-500 {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+body.theme-dark .bg-\[\#f5f5f7\]\/95 .text-gray-400\/90 {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+body.theme-dark .bg-\[\#f5f5f7\]\/95 .bg-gray-300\/60 {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   2. Window chrome (titlebars) — all windows, desktop + mobile
+   ──────────────────────────────────────────────────────────────────────────── */
+body.theme-dark #settings #window-header,
+body.theme-dark #safari #window-header,
+body.theme-dark #finder #window-header,
+body.theme-dark #terminal #window-header,
+body.theme-dark #notes #window-header,
+body.theme-dark #photos #window-header,
+body.theme-dark #resume #window-header,
+body.theme-dark #txtfile #window-header,
+body.theme-dark #imgfile #window-header {
+  background-color: #161618 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+body.theme-dark #settings .window-header {
+  background-color: #161618 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+body.theme-dark #imgfile #window-header p {
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   3. Generic utility remaps inside fully-flipped windows
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Base text color inheritance + form controls */
+body.theme-dark :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume) {
+  color: rgba(255, 255, 255, 0.92);
+}
+body.theme-dark :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(input, select, textarea) {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Primary text */
+body.theme-dark
+  :is(#settings, #finder, #photos, #txtfile, #imgfile, #resume, #terminal)
+  :is(.text-black, .text-gray-900, .text-gray-800, .text-gray-700) {
+  color: rgba(255, 255, 255, 0.92);
+}
+body.theme-dark
+  :is(#settings, #finder, #photos, #txtfile, #imgfile, #resume, #terminal)
+  :is(.text-gray-600, .text-gray-500) {
+  color: rgba(255, 255, 255, 0.6);
+}
+body.theme-dark
+  :is(#settings, #finder, #photos, #txtfile, #imgfile, #resume, #terminal)
+  :is(.text-gray-400, .text-zinc-400) {
+  color: rgba(255, 255, 255, 0.45);
+}
+body.theme-dark
+  :is(#settings, #finder, #photos, #txtfile, #imgfile, #resume, #terminal)
+  :is(.text-gray-300, .text-zinc-300) {
+  color: rgba(255, 255, 255, 0.32);
+}
+body.theme-dark :is(#settings, #finder, #photos, #txtfile, #imgfile, #resume, #terminal) .text-zinc-600 {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Safari text — same remaps but excluding Reader-mode content (.select-text) */
+body.theme-dark #safari :is(.text-black, .text-gray-900, .text-gray-800, .text-gray-700):not(:where(.select-text, .select-text *)) {
+  color: rgba(255, 255, 255, 0.92);
+}
+body.theme-dark #safari :is(.text-gray-600, .text-gray-500):not(:where(.select-text, .select-text *)) {
+  color: rgba(255, 255, 255, 0.6);
+}
+body.theme-dark #safari :is(.text-gray-400, .text-zinc-400):not(:where(.select-text, .select-text *)) {
+  color: rgba(255, 255, 255, 0.45);
+}
+body.theme-dark #safari :is(.text-gray-300):not(:where(.select-text, .select-text *)) {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+/* Placeholders */
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.placeholder-gray-400, .placeholder-gray-500, .placeholder-zinc-400)::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* Backgrounds */
+body.theme-dark
+  :is(#settings, #finder, #photos, #txtfile, #imgfile, #resume, #terminal)
+  .bg-white {
+  background-color: #232326;
+}
+body.theme-dark
+  :is(#settings, #finder, #photos, #txtfile, #imgfile, #resume, #terminal)
+  :is(.bg-white\/60, .bg-white\/65, .bg-white\/70, .bg-white\/75) {
+  background-color: rgba(42, 42, 46, 0.72);
+}
+body.theme-dark
+  :is(#settings, #finder, #photos, #txtfile, #imgfile, #resume, #terminal)
+  :is(.bg-white\/80, .bg-white\/85) {
+  background-color: rgba(42, 42, 46, 0.8);
+}
+body.theme-dark
+  :is(#settings, #finder, #photos, #txtfile, #imgfile, #resume, #terminal)
+  :is(.bg-white\/90, .bg-white\/95) {
+  background-color: rgba(35, 35, 38, 0.94);
+}
+
+/* Safari backgrounds — excluding Reader-mode paper */
+body.theme-dark #safari .bg-white:not(.select-text):not(:where(.select-text, .select-text *)) {
+  background-color: #232326;
+}
+body.theme-dark #safari .bg-white\/80:not(:where(.select-text, .select-text *)) {
+  background-color: rgba(42, 42, 46, 0.78);
+}
+body.theme-dark #safari :is(.bg-white\/90, .bg-white\/95):not(:where(.select-text, .select-text *)) {
+  background-color: rgba(35, 35, 38, 0.94);
+}
+
+/* Gray ladders (both scope families) */
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  .bg-gray-50 {
+  background-color: #1f1f23;
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  .bg-gray-100 {
+  background-color: #2a2a2e;
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.bg-gray-200, .bg-gray-300, .bg-zinc-200, .bg-zinc-300, .bg-neutral-100) {
+  background-color: #34343a;
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.bg-gray-200\/60, .bg-gray-200\/50, .bg-zinc-200\/50, .bg-gray-100\/80) {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Black-alpha surfaces → white-alpha (chips, inactive tabs, skeleton tints) */
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.bg-black\/5, .bg-black\/8) {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  .bg-black\/10 {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  .bg-black\/15 {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Hover / active backgrounds */
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.hover\:bg-gray-50, .hover\:bg-gray-100):hover {
+  background-color: #2e2e34;
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.hover\:bg-gray-200, .hover\:bg-zinc-200):hover {
+  background-color: #3a3a41;
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.active\:bg-gray-200, .active\:bg-gray-300, .active\:bg-zinc-200):active {
+  background-color: #3a3a41;
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.hover\:bg-black\/5, .hover\:bg-black\/8):hover {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.hover\:bg-black\/10, .hover\:bg-black\/15):hover {
+  background-color: rgba(255, 255, 255, 0.11);
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  .active\:bg-gray-100:active {
+  background-color: #303036;
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.hover\:bg-gray-200\/60, .hover\:bg-gray-200\/50):hover {
+  background-color: rgba(255, 255, 255, 0.09);
+}
+
+/* Borders + dividers */
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.border-black\/5, .border-black\/10) {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.border-gray-100, .border-zinc-200\/50, .border-zinc-300\/30) {
+  border-color: rgba(255, 255, 255, 0.09);
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.border-gray-200, .border-zinc-200, .border-gray-200\/60, .border-gray-200\/70) {
+  border-color: rgba(255, 255, 255, 0.11);
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.border-gray-300, .border-zinc-300, .border-gray-400\/30) {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+body.theme-dark
+  :is(#settings, #safari, #finder, #terminal, #photos, #txtfile, #imgfile, #resume)
+  :is(.divide-gray-200, .divide-gray-100, .divide-zinc-200) > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   4. Terminal window frame (xterm content itself is handled elsewhere)
+   ──────────────────────────────────────────────────────────────────────────── */
+body.theme-dark #terminal > div.bg-white {
+  background-color: #1a1a1c;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   5. Safari chrome specifics (tab bar, sidebar, start page, popovers)
+   ──────────────────────────────────────────────────────────────────────────── */
+body.theme-dark #safari .bg-\[\#eef1f5\] {
+  background-color: #202024;
+}
+body.theme-dark #safari .bg-\[\#f5f6f8\] {
+  background-color: #1c1c20;
+}
+body.theme-dark #safari .bg-\[\#f8f8f8\] {
+  background-color: #161618;
+}
+body.theme-dark #safari .bg-\[\#e3e4e6\],
+body.theme-dark #safari .bg-\[\#e9e9eb\],
+body.theme-dark #safari .bg-\[\#f3f1ee\] {
+  background-color: #2c2c30;
+}
+body.theme-dark #safari .bg-\[\#c8cbd0\] {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+body.theme-dark #safari :is(.border-\[\#c8cbd0\], .border-\[\#c8cbd0\]\/60, .border-\[\#c8cbd0\]\/50) {
+  border-color: rgba(255, 255, 255, 0.13);
+}
+body.theme-dark #safari .border-\[\#c8cbd0\]\/40 {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Reader-mode white theme keeps its paper (root carries .select-text) — no-op */
+
+/* ────────────────────────────────────────────────────────────────────────────
+   6. Finder specifics (desktop classes from apps.css + mobile inline styles)
+   ──────────────────────────────────────────────────────────────────────────── */
+body.theme-dark #finder {
+  background-color: #1a1a1c;
+}
+body.theme-dark #finder .sidebar {
+  background-color: #1c1c20;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+body.theme-dark #finder .sidebar h3 {
+  color: rgba(255, 255, 255, 0.45);
+}
+body.theme-dark #finder .sidebar .active {
+  background-color: rgba(0, 122, 255, 0.25);
+  color: #79b9ff;
+}
+body.theme-dark #finder .sidebar .not-active {
+  color: rgba(255, 255, 255, 0.75);
+}
+body.theme-dark #finder .sidebar .not-active:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+body.theme-dark #finder .content {
+  background-color: #232326;
+  color: rgba(255, 255, 255, 0.92);
+}
+body.theme-dark #finder .content li p {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Mobile Finder renders inline styles — override them */
+body.theme-dark #finder #window-header {
+  background-color: #161618 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+body.theme-dark #finder .finder-main {
+  background-color: #1a1a1c !important;
+}
+body.theme-dark
+  #finder
+  .finder-main
+  div[style*="background: #fff"],
+body.theme-dark
+  #finder
+  .finder-main
+  div[style*="background:#fff"],
+body.theme-dark
+  #finder
+  .finder-main
+  div[style*="background: rgb(255, 255, 255)"] {
+  background-color: #232326 !important;
+}
+body.theme-dark #finder .finder-main button[style*="#e8f0fe"] {
+  background-color: rgba(0, 122, 255, 0.25) !important;
+}
+body.theme-dark #finder .finder-main div[style*="#f2f2f7"] {
+  background-color: #2c2c30 !important;
+}
+body.theme-dark #finder .finder-main button[style*="#e5e5ea"] {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.theme-dark
+  #finder
+  :is([style*="color: #000"], [style*="color:#000"], [style*="color: rgb(0, 0, 0)"]) {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+body.theme-dark #finder [style*="#6d6d72"] {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+body.theme-dark #finder [style*="#8e8e93"] {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   7. Settings specifics (sidebar surface, iOS grouped cards)
+   ──────────────────────────────────────────────────────────────────────────── */
+body.theme-dark #settings {
+  background-color: #1a1a1c;
+}
+body.theme-dark #settings .bg-\[\#f2f2f7\] {
+  background-color: #1a1a1c;
+}
+body.theme-dark #settings .border-\[\#d1d1d6\] {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+body.theme-dark #settings .bg-black\/5 {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   8. Notes — CHROME ONLY (paper stays light on purpose)
+   ──────────────────────────────────────────────────────────────────────────── */
+body.theme-dark #notes .bg-\[\#f4f3ef\] {
+  background-color: #1c1c20;
+  color: rgba(255, 255, 255, 0.92);
+}
+body.theme-dark #notes .bg-\[\#f4f3ef\] :is(.text-gray-900, .text-gray-800, .text-gray-700) {
+  color: rgba(255, 255, 255, 0.9);
+}
+body.theme-dark #notes .bg-\[\#f4f3ef\] :is(.text-gray-600, .text-gray-500) {
+  color: rgba(255, 255, 255, 0.6);
+}
+body.theme-dark #notes .bg-\[\#f4f3ef\] .text-gray-400 {
+  color: rgba(255, 255, 255, 0.45);
+}
+body.theme-dark #notes .bg-\[\#f4f3ef\] :is(.border-\[\#d1d1d1\], .border-gray-200, .border-gray-300\/30, .border-gray-300) {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+body.theme-dark #notes .bg-\[\#f4f3ef\] :is(.hover\:bg-gray-200, .hover\:bg-gray-200\/60):hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+body.theme-dark #notes .bg-\[\#f4f3ef\] .bg-gray-200\/60 {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+body.theme-dark #notes .bg-\[\#f4f3ef\] input {
+  color: rgba(255, 255, 255, 0.92);
+}
+body.theme-dark #notes .bg-\[\#f4f3ef\] input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+body.theme-dark #notes .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Editor toolbar strip */
+body.theme-dark #notes .bg-gray-50\/70 {
+  background-color: #202023;
+  color: rgba(255, 255, 255, 0.85);
+}
+body.theme-dark #notes .bg-gray-50\/70 :is(.text-gray-600, .text-gray-500) {
+  color: rgba(255, 255, 255, 0.62);
+}
+body.theme-dark #notes .bg-gray-50\/70 .text-gray-400 {
+  color: rgba(255, 255, 255, 0.45);
+}
+body.theme-dark #notes .bg-gray-50\/70 :is(.hover\:bg-gray-200):hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+body.theme-dark #notes .bg-gray-50\/70 .bg-gray-300 {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+body.theme-dark #notes .bg-gray-50\/70 .border-\[\#d1d1d1\] {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+/* Note paper (bg-[#fbfaf8] + .notes-content-area) intentionally NOT remapped */
+
+/* ────────────────────────────────────────────────────────────────────────────
+   9. Misc window-frame fixes for flipped apps
+   ──────────────────────────────────────────────────────────────────────────── */
+body.theme-dark #txtfile,
+body.theme-dark #imgfile,
+body.theme-dark #photos,
+body.theme-dark #resume {
+  background-color: #1a1a1c;
+}
+body.theme-dark #resume .resume-main {
+  background-color: #1a1a1c;
+}
+body.theme-dark #photos .photos-main {
+  background-color: #1a1a1c;
+}
+body.theme-dark #imgfile {
+  background-color: #1a1a1c !important;
+}
+body.theme-dark #imgfile .preview {
+  background-color: #26262a;
+}
+/* Legacy mobile.css pins some terminal header text to black — lift it */
+body.theme-dark #terminal #window-header h2 {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   9. Layered !important overrides — window chrome that uses Tailwind v4
+   important utilities (!bg-[…]). Per the cascade spec, layered !important
+   beats unlayered !important, so these MUST live inside @layer utilities.
+   ──────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  body.theme-dark .bg-\[\#f3f3f3\]\!,
+  body.theme-dark .\!bg-\[\#eef1f5\],
+  body.theme-dark .\!bg-\[\#f5f5f5\] {
+    background-color: #161618 !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  body.theme-dark .border-b-\[\#d1d1d6\]\!,
+  body.theme-dark .border-b-\[\#d1d1d1\]\!,
+  body.theme-dark .\!border-b-\[\#c8cbd0\],
+  body.theme-dark .\!border-b-\[\#d4d4d4\] {
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Toolbar input shells inside Safari/Photos headers */
+  body.theme-dark #safari #window-header input,
+  body.theme-dark #safari #window-header .bg-white,
+  body.theme-dark #photos #window-header .bg-white {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+}
