@@ -5,8 +5,7 @@ An interactive, macOS-inspired developer portfolio built with **Next.js 16 + Rea
 VS Code-style preview, Siri assistant…); mobile renders an iOS-style experience with
 the same apps.
 
-Originally based on [macos-portfolio](https://github.com/kuldeeprajput-dev) by
-**Kuldeep Rajput** (MIT) — heavily customized for Tharunn D.
+
 
 ## Quick start
 
