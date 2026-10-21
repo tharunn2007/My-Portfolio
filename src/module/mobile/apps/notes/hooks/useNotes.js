@@ -1,25 +1,18 @@
+import { readStoredCollection, writeStoredCollection, isStoredNote } from "@lib/storage";
 import { useState, useEffect } from "react";
 import { defaultNotes } from "../data";
 
 export default function useNotes() {
-  const [notes, setNotes] = useState(() => {
-    const saved = localStorage.getItem("macos_portfolio_notes");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return defaultNotes;
-  });
+  const [notes, setNotes] = useState(() =>
+    readStoredCollection("macos_portfolio_notes", defaultNotes, isStoredNote),
+  );
 
   const [activeNoteId, setActiveNoteId] = useState(notes[0]?.id || "");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem("macos_portfolio_notes", JSON.stringify(notes));
+    writeStoredCollection("macos_portfolio_notes", notes);
   }, [notes]);
 
   const stripHtml = (html) => {

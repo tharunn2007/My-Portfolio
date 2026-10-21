@@ -1,0 +1,58 @@
+/* Shared interaction feedback across desktop and mobile apps. */
+:where(button, a, input, textarea, select, [tabindex], [contenteditable="true"]):focus-visible {
+  outline: 2px solid #59b9ff;
+  outline-offset: 3px;
+}
+
+:where(input, textarea, [contenteditable="true"], .select-text) {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+:where(button:disabled, input:disabled, select:disabled) {
+  cursor: not-allowed;
+}
+
+#window-controls button {
+  position: relative;
+  border: 0;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+#window-controls button::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+#window-controls button:focus-visible {
+  outline-offset: 4px;
+}
+
+@media (pointer: coarse) {
+  #window-controls {
+    gap: 16px;
+  }
+  #window-controls button::after {
+    inset: -7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (min-width: 768px) {
+  main > section.window-visible:not(.maximized) {
+    max-width: calc(100dvw - 24px);
+    max-height: calc(100dvh - 60px);
+  }
+}

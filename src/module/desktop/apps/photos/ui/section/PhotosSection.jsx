@@ -81,7 +81,7 @@ const PhotosSection = ({
     } else {
       setIsSidebarOpen(true);
     }
-  }, [isNarrow]);
+  }, [isNarrow, setShowInfo]);
 
   const [showShareDropdown, setShowShareDropdown] = useState(false);
   const shareDropdownRef = useRef(null);

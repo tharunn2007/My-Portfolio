@@ -135,7 +135,7 @@ export default function useCalculator() {
       }
 
       setValue(newValue);
-      setDisplayValue(String(newValue));
+      setDisplayValue(String(Number(newValue.toPrecision(12))));
       setExpression(nextOperator === "=" ? "" : `${expression}${formatOperator(nextOperator)}`);
     } else if (nextOperator !== "=") {
       setExpression(`${displayValue}${formatOperator(nextOperator)}`);

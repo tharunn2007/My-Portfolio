@@ -24,7 +24,7 @@ const Dock = () => {
   const dragStartTimerRef = useRef(null);
   const dockRef = useDock();
 
-  const resetAllIcons = () => {
+  const resetAllIcons = useCallback(() => {
     if (dockRef.current) {
       const icons = dockRef.current.querySelectorAll(".dock-icon");
       icons.forEach((icon) => {
@@ -32,7 +32,7 @@ const Dock = () => {
         gsap.set(icon, { clearProps: "all" });
       });
     }
-  };
+  }, [dockRef]);
 
   const focusedWindowId = useMemo(() => {
     return Object.entries(windows).reduce((focusedId, [id, win]) => {
@@ -178,7 +178,7 @@ const Dock = () => {
     setHoveredAppId(null);
     setDockDragging(false);
     resetAllIcons();
-  }, [setDockDragging]);
+  }, [setDockDragging, resetAllIcons]);
 
   useEffect(() => {
     const handleGlobalDragEnd = () => {

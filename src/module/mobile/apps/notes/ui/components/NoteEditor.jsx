@@ -25,6 +25,10 @@ const NoteEditor = ({ activeNote, onUpdateNote, onCreateNote }) => {
         <div
           ref={editorRef}
           contentEditable
+          role="textbox"
+          aria-label="Note content"
+          aria-multiline="true"
+          suppressContentEditableWarning
           onInput={handleInput}
           className="notes-content-area flex-1 w-full bg-transparent text-base resize-none border-none outline-none focus:ring-0 focus:outline-none font-sans leading-relaxed text-gray-800 min-h-[300px] caret-[#ff9f0a]"
           data-placeholder="Start writing..."

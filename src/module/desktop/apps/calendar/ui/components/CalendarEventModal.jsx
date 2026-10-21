@@ -1,3 +1,4 @@
+import useDialogFocus from "@module/shared/ui/components/useDialogFocus";
 import { Calendar as CalendarIcon, Clock, Tag, AlignLeft } from "lucide-react";
 import { CATEGORIES } from "../../data/calendarData";
 
@@ -20,6 +21,7 @@ const CalendarEventModal = ({
   isNarrow,
   isVeryNarrow,
 }) => {
+  const dialogRef = useDialogFocus(isModalOpen, () => setIsModalOpen(false));
   if (!isModalOpen) return null;
 
   return (
@@ -27,7 +29,28 @@ const CalendarEventModal = ({
       className={`absolute inset-0 bg-black/30 backdrop-blur-xs z-50 flex items-center justify-center ${isVeryNarrow ? "p-2" : "p-4"}`}
     >
       <form
-        onSubmit={handleAddEvent}
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label="New calendar event"
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.stopPropagation();
+            setIsModalOpen(false);
+          }
+        }}
+        onSubmit={(e) => {
+          const end = e.currentTarget.elements.namedItem("eventEnd");
+          end?.setCustomValidity(
+            eventEnd <= eventStart ? "End time must be after start time." : "",
+          );
+          if (!e.currentTarget.reportValidity()) {
+            e.preventDefault();
+            return;
+          }
+          handleAddEvent(e);
+        }}
         className="w-full max-w-[380px] max-h-[92%] bg-white rounded-2xl shadow-2xl border border-black/10 flex flex-col overflow-hidden animate-fade-in"
       >
         <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center">
@@ -44,6 +67,8 @@ const CalendarEventModal = ({
             <label className="font-bold text-gray-700">Event Title</label>
             <input
               type="text"
+              aria-label="Event title"
+              pattern={".*\\S.*"}
               required
               placeholder="e.g. Google Interview"
               value={eventTitle}
@@ -56,6 +81,7 @@ const CalendarEventModal = ({
             <label className="font-bold text-gray-700">Date</label>
             <input
               type="date"
+              aria-label="Event date"
               required
               value={eventDate}
               onChange={(e) => setEventDate(e.target.value)}
@@ -71,8 +97,12 @@ const CalendarEventModal = ({
               <input
                 type="time"
                 required
+                aria-label="Start time"
                 value={eventStart}
-                onChange={(e) => setEventStart(e.target.value)}
+                onChange={(e) => {
+                  setEventStart(e.target.value);
+                  e.currentTarget.form?.elements.namedItem("eventEnd")?.setCustomValidity("");
+                }}
                 className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
               />
             </div>
@@ -83,6 +113,9 @@ const CalendarEventModal = ({
               <input
                 type="time"
                 required
+                name="eventEnd"
+                aria-label="End time"
+                onInput={(e) => e.currentTarget.setCustomValidity("")}
                 value={eventEnd}
                 onChange={(e) => setEventEnd(e.target.value)}
                 className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
@@ -95,6 +128,7 @@ const CalendarEventModal = ({
               <Tag className="w-3.5 h-3.5 text-gray-400" /> Category
             </label>
             <select
+              aria-label="Event category"
               value={eventCategory}
               onChange={(e) => setEventCategory(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 font-medium"
@@ -114,6 +148,7 @@ const CalendarEventModal = ({
             <textarea
               placeholder="Event details..."
               rows={3}
+              aria-label="Event description"
               value={eventDesc}
               onChange={(e) => setEventDesc(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 font-medium placeholder-gray-400 resize-none"
@@ -124,6 +159,7 @@ const CalendarEventModal = ({
         <div className="bg-gray-50 border-t border-gray-150 px-4 py-3 flex justify-end gap-2">
           <button
             type="button"
+            aria-label="Close event form"
             onClick={() => setIsModalOpen(false)}
             className="px-3.5 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer"
           >

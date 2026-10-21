@@ -1,10 +1,11 @@
+import { readStoredArrayText, writeStoredCollection } from "@lib/storage";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INITIAL_CONVERSATIONS } from "../data/messagesData";
 import { projects, techStack, EMAIL, OWNER_HANDLE } from "@constants";
 
 const useMessages = () => {
   const [conversations, setConversations] = useState(() => {
-    const saved = localStorage.getItem("macos_portfolio_messages");
+    const saved = readStoredArrayText("macos_portfolio_messages");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -46,7 +47,7 @@ const useMessages = () => {
   const activeChat = conversations.find((c) => c.id === activeChatId) || conversations[0];
 
   useEffect(() => {
-    localStorage.setItem("macos_portfolio_messages", JSON.stringify(conversations));
+    writeStoredCollection("macos_portfolio_messages", conversations);
   }, [conversations]);
 
   useEffect(() => {

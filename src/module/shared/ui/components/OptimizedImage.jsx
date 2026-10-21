@@ -20,7 +20,17 @@ const OptimizedImage = ({
   if (!src) return null;
 
   if (!isOptimizableLocalImage(src)) {
-    return <img src={src} alt={alt} loading={priority ? "eager" : loading} {...props} />;
+    return (
+      <img
+        src={src}
+        alt={alt}
+        width={fill ? undefined : width}
+        height={fill ? undefined : height}
+        decoding="async"
+        loading={priority ? "eager" : loading}
+        {...props}
+      />
+    );
   }
 
   const imageProps = {

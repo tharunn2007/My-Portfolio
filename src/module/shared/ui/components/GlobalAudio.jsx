@@ -24,20 +24,28 @@ const getCoverEmoji = (name) => {
 };
 
 export default function GlobalAudio() {
-  const { music, setMusicState } = useWindowsStore();
+  const music = useWindowsStore((state) => state.music);
+  const setMusicState = useWindowsStore((state) => state.setMusicState);
   const { activeTrack, isPlaying, volume, isMuted, tracks, isShuffle, isRepeat } = music;
   const audioRef = useRef(null);
   const prevUrlRef = useRef("");
 
   // Fetch initial tracks on load if none exist
   useEffect(() => {
+    const controller = new AbortController();
+    const initialTracks = useWindowsStore.getState().music.tracks;
     const fetchInitialTracks = async () => {
       try {
         const clientId = process.env.NEXT_PUBLIC_JAMENDO_CLIENT_ID;
+        if (!clientId) return;
         const res = await fetch(
           `https://api.jamendo.com/v3.0/tracks/?client_id=${clientId}&format=json&limit=25&tags=pop&order=popularity_total_desc`,
+          { signal: controller.signal },
         );
+        if (!res.ok) throw new Error("Music service unavailable");
         const data = await res.json();
+        if (controller.signal.aborted || useWindowsStore.getState().music.tracks !== initialTracks)
+          return;
 
         if (data.headers && data.headers.status === "success" && data.results) {
           const formattedTracks = data.results.map((track, index) => {
@@ -64,7 +72,7 @@ export default function GlobalAudio() {
               tracks: formattedTracks,
             });
             // Also set the first track as active if none is selected
-            if (activeTrack.id === 0) {
+            if (useWindowsStore.getState().music.activeTrack.id === 0) {
               setMusicState({
                 activeTrack: formattedTracks[0],
               });
@@ -72,14 +80,15 @@ export default function GlobalAudio() {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch initial tracks:", err);
+        if (!controller.signal.aborted) console.error("Failed to fetch initial tracks:", err);
       }
     };
 
-    if (!tracks || tracks.length === 0) {
+    if (!initialTracks?.length) {
       fetchInitialTracks();
     }
-  }, [setMusicState, tracks, activeTrack.id]);
+    return () => controller.abort();
+  }, [setMusicState]);
 
   // Sync play/pause
   useEffect(() => {
@@ -110,7 +119,7 @@ export default function GlobalAudio() {
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
-      audio.volume = isMuted ? 0 : volume / 100;
+      audio.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume / 100));
     }
   }, [volume, isMuted]);
 

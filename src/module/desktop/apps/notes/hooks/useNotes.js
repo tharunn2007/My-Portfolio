@@ -1,3 +1,9 @@
+import {
+  readStoredCollection,
+  writeStoredCollection,
+  isStoredNote,
+  isStoredFolder,
+} from "@lib/storage";
 import { useState, useEffect } from "react";
 
 const defaultFolders = [
@@ -27,29 +33,13 @@ const defaultNotes = [
 ];
 
 export default function useNotes() {
-  const [folders, setFolders] = useState(() => {
-    const saved = localStorage.getItem("macos_portfolio_note_folders");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return defaultFolders;
-  });
+  const [folders, setFolders] = useState(() =>
+    readStoredCollection("macos_portfolio_note_folders", defaultFolders, isStoredFolder),
+  );
 
-  const [notes, setNotes] = useState(() => {
-    const saved = localStorage.getItem("macos_portfolio_notes");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return defaultNotes;
-  });
+  const [notes, setNotes] = useState(() =>
+    readStoredCollection("macos_portfolio_notes", defaultNotes, isStoredNote),
+  );
 
   const [activeFolderId, setActiveFolderId] = useState("all");
   const [activeNoteId, setActiveNoteId] = useState("");
@@ -63,11 +53,11 @@ export default function useNotes() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("macos_portfolio_note_folders", JSON.stringify(folders));
+    writeStoredCollection("macos_portfolio_note_folders", folders);
   }, [folders]);
 
   useEffect(() => {
-    localStorage.setItem("macos_portfolio_notes", JSON.stringify(notes));
+    writeStoredCollection("macos_portfolio_notes", notes);
   }, [notes]);
 
   const stripHtml = (html) => {

@@ -10,6 +10,7 @@ const Weather = () => {
   const { windows, setWindowData } = useWindowsStore();
   const [showAbout, setShowAbout] = useState(false);
   const allProps = useWeather();
+  const { setIsSidebarOpen } = allProps;
 
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(800);
@@ -29,11 +30,11 @@ const Weather = () => {
 
   useEffect(() => {
     if (isNarrow) {
-      allProps.setIsSidebarOpen(false);
+      setIsSidebarOpen(false);
     } else {
-      allProps.setIsSidebarOpen(true);
+      setIsSidebarOpen(true);
     }
-  }, [isNarrow, allProps.setIsSidebarOpen]);
+  }, [isNarrow, setIsSidebarOpen]);
 
   useEffect(() => {
     if (windows.weather?.data?.openAbout) {

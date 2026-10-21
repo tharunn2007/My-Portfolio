@@ -86,17 +86,11 @@ const MobileNotch = () => {
 
   // Sync music state to notch state
   useEffect(() => {
-    if (isSiriOpen) {
-      setNotchState("SIRI");
-    } else if (music.isPlaying) {
-      if (notchState !== "EXPANDED_MUSIC") {
-        setNotchState("ACTIVE_MUSIC");
-      }
-    } else {
-      if (notchState !== "SIRI") {
-        setNotchState("IDLE");
-      }
-    }
+    setNotchState((previous) => {
+      if (isSiriOpen) return "SIRI";
+      if (music.isPlaying) return previous === "EXPANDED_MUSIC" ? previous : "ACTIVE_MUSIC";
+      return "IDLE";
+    });
   }, [music.isPlaying, isSiriOpen]);
 
   // Auto-scroll messages

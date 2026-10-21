@@ -1,3 +1,4 @@
+import { readStoredArrayText, writeStoredCollection } from "@lib/storage";
 import { useState, useEffect, useRef } from "react";
 import { INITIAL_CHATS } from "../data";
 import {
@@ -18,7 +19,7 @@ const firstSentence = (text) => String(text ?? "").split(/(?<=[.!?])\s+/)[0];
 
 const useTelegram = () => {
   const [chats, setChats] = useState(() => {
-    const saved = localStorage.getItem("macos_portfolio_telegram");
+    const saved = readStoredArrayText("macos_portfolio_telegram");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -66,7 +67,7 @@ const useTelegram = () => {
   const ringingTimeoutRef = useRef(null);
 
   const [callLogs, setCallLogs] = useState(() => {
-    const saved = localStorage.getItem("macos_portfolio_telegram_calls");
+    const saved = readStoredArrayText("macos_portfolio_telegram_calls");
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -105,7 +106,7 @@ const useTelegram = () => {
   });
 
   useEffect(() => {
-    localStorage.setItem("macos_portfolio_telegram_calls", JSON.stringify(callLogs));
+    writeStoredCollection("macos_portfolio_telegram_calls", callLogs);
   }, [callLogs]);
 
   useEffect(() => {
@@ -232,7 +233,7 @@ const useTelegram = () => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    localStorage.setItem("macos_portfolio_telegram", JSON.stringify(chats));
+    writeStoredCollection("macos_portfolio_telegram", chats);
   }, [chats]);
 
   const activeChat = chats.find((c) => c.id === activeChatId) || chats[0];
@@ -288,7 +289,10 @@ const useTelegram = () => {
           reply = `Hello! I am your Telegram assistant. Type \`/projects\`, \`/skills\`, or \`/contact\` to browse ${OWNER_NAME}'s portfolio.`;
         } else if (cmd.includes("/project")) {
           const projectLines = projects
-            .map((project, index) => `${index + 1}. **${project.title}**: ${firstSentence(project.description)}`)
+            .map(
+              (project, index) =>
+                `${index + 1}. **${project.title}**: ${firstSentence(project.description)}`,
+            )
             .join("\n");
           reply = `Here are some featured projects:\n${projectLines}`;
         } else if (cmd.includes("/skill") || cmd.includes("/tech")) {

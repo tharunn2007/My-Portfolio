@@ -1,4 +1,4 @@
-import { useState } from "react";
+import useCopyFeedback from "@module/shared/ui/components/useCopyFeedback";
 import WindowControls from "@components/WindowControls";
 import windowWrapper from "@hoc/windowWrapper";
 import { EMAIL, PHONE } from "@constants";
@@ -6,13 +6,7 @@ import ContactCard from "./ContactCard";
 import ContactList from "./ContactList";
 
 const Contact = () => {
-  const [copied, setCopied] = useState("");
-
-  const handleCopy = (text, label) => {
-    navigator.clipboard.writeText(text);
-    setCopied(label);
-    setTimeout(() => setCopied(""), 2000);
-  };
+  const { copied, copyError, handleCopy } = useCopyFeedback();
 
   return (
     <div className="flex flex-col h-full w-full @container bg-white rounded-xl overflow-hidden">
@@ -21,6 +15,9 @@ const Contact = () => {
         <h2 className="flex-1 text-center text-sm font-bold text-gray-500">Contact Me</h2>
       </div>
       <div className="p-5 space-y-5 flex-1 overflow-y-auto">
+        <p role="status" aria-live="polite" className="text-xs text-red-500">
+          {copyError}
+        </p>
         <ContactCard email={EMAIL} phone={PHONE} copied={copied} onCopy={handleCopy} />
         <ContactList />
       </div>

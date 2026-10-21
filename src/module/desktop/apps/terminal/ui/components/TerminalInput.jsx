@@ -15,8 +15,8 @@ import {
 } from "@constants";
 import { profile } from "@constants/profile";
 import {
-  renderDonutFrame,
-  donutGeometry,
+  renderCatFrame,
+  catGeometry,
   bannerWelcomeLines,
   BANNER_COLORS,
 } from "@lib/terminalBanner";
@@ -45,17 +45,12 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         t.write("\r\n" + msg + "\x1b[0m");
       };
 
-      // ------------------------------------------------------------------
-      // DONUT BANNER — Andy Sloane (a1k0n) donut.c tribute, scaled down.
-      // Boot: welcome pill + a spinning donut takeover; any key drops to
-      // the shell, which keeps a frozen donut frame as the banner. The
-      // `donut` command re-spins it anytime.
-      // ------------------------------------------------------------------
+      // Animated cat splash; any key opens the shell.
       let donut = null; // { timer, geometry }
 
       const staticDonutFrame = (terminal) => {
-        const geometry = donutGeometry(terminal.cols);
-        renderDonutFrame(1.05, 0.55, geometry).forEach((line) => terminal.writeln(` ${line}`));
+        const geometry = catGeometry(terminal.cols, terminal.rows);
+        renderCatFrame(1.05, 0.55, geometry).forEach((line) => terminal.writeln(` ${line}`));
       };
 
       printBanner = (terminal) => {
@@ -81,16 +76,16 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
 
       const startDonut = () => {
         if (donut) return;
-        const geometry = donutGeometry(t.cols);
+        const geometry = catGeometry(t.cols, t.rows);
         let A = 1.0;
         let B = 0.4;
 
         const render = () => {
           const out = [
-            `\x1b[2J\x1b[H\x1b[38;2;113;113;122m  donut.c — Andy Sloane tribute  \x1b[0m`,
+            `\x1b[2J\x1b[H\x1b[38;2;113;113;122m  cat — sparkling eyes  \x1b[0m`,
             "",
           ];
-          renderDonutFrame(A, B, geometry).forEach((line) => out.push(` ${line}`));
+          renderCatFrame(A, B, geometry).forEach((line) => out.push(` ${line}`));
           out.push("");
           out.push("\x1b[38;2;113;113;122m  press any key for the shell…\x1b[0m");
           t.write(out.join("\r\n"));
@@ -99,13 +94,13 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         };
 
         render();
-        donut = { timer: setInterval(render, 50), geometry };
+        donut = { timer: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? null : setInterval(render, 160), geometry };
         if (term) term._donutTimer = donut.timer;
       };
 
       printBanner(t);
 
-      // Boot splash — donut spins until the first keystroke.
+      // Live cat splash until the first keystroke.
       if (t.cols >= 26) startDonut();
 
       // ------------------------------------------------------------------
@@ -350,7 +345,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
                 `${orange("flappy")}    \x1b[38;2;75;85;99m- Play ascii flappy bird\x1b[0m`,
               );
               println(
-                `${orange("donut")}     \x1b[38;2;75;85;99m- Spin the donut.c ascii torus\x1b[0m`,
+                `${orange("cat")}     \x1b[38;2;75;85;99m- Show the live sparkling cat\x1b[0m`,
               );
               println(
                 "\x1b[1;38;2;16;185;129msudo\x1b[0m      \x1b[38;2;75;85;99m- Run superuser command\x1b[0m",
@@ -423,6 +418,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
               t.write("\x1b[2J\x1b[H");
               startFlappy();
               break;
+            case "cat":
             case "donut":
               t.write("\x1b[2J\x1b[H");
               startDonut();

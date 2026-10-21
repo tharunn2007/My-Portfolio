@@ -1,3 +1,4 @@
+import { readStoredArrayText, writeStoredCollection } from "@lib/storage";
 import { useState, useEffect, useRef } from "react";
 import { INITIAL_CHATS } from "../data/telegramData";
 import {
@@ -19,7 +20,7 @@ const firstSentence = (text) => String(text ?? "").split(/(?<=[.!?])\s+/)[0];
 const useTelegram = () => {
   const [chats, setChats] = useState(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("macos_portfolio_telegram");
+      const saved = readStoredArrayText("macos_portfolio_telegram");
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -68,7 +69,7 @@ const useTelegram = () => {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("macos_portfolio_telegram", JSON.stringify(chats));
+      writeStoredCollection("macos_portfolio_telegram", chats);
     }
   }, [chats]);
 
@@ -133,7 +134,10 @@ const useTelegram = () => {
           reply = `Hello! I am your Telegram assistant. Type \`/projects\`, \`/skills\`, or \`/contact\` to browse ${OWNER_NAME}'s portfolio.`;
         } else if (cmd.includes("/project")) {
           const projectLines = projects
-            .map((project, index) => `${index + 1}. **${project.title}**: ${firstSentence(project.description)}`)
+            .map(
+              (project, index) =>
+                `${index + 1}. **${project.title}**: ${firstSentence(project.description)}`,
+            )
             .join("\n");
           reply = `Here are some featured projects:\n${projectLines}`;
         } else if (cmd.includes("/skill") || cmd.includes("/tech")) {

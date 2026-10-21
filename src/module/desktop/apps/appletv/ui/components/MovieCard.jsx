@@ -12,8 +12,9 @@ const MovieCard = ({
 }) => {
   const [posterUrl, setPosterUrl] = useState(movie.posterUrl || null);
 
+  const hasPoster = Object.hasOwn(movie, "posterUrl");
   useEffect(() => {
-    if (Object.hasOwn(movie, "posterUrl")) {
+    if (hasPoster) {
       setPosterUrl(movie.posterUrl || null);
       return;
     }
@@ -42,7 +43,7 @@ const MovieCard = ({
     };
     fetchPoster();
     return () => controller.abort();
-  }, [movie.posterUrl, movie.tmdbId, movie.type, preferBackdrop]);
+  }, [hasPoster, movie.posterUrl, movie.tmdbId, movie.type, preferBackdrop]);
 
   return (
     <div className="group cursor-pointer space-y-2" onClick={onPlay}>

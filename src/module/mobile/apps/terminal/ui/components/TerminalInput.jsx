@@ -3,7 +3,7 @@ import { Terminal as XTerm } from "xterm";
 import "xterm/css/xterm.css";
 import { FitAddon } from "@xterm/addon-fit";
 import { techStack, projects, OWNER_HANDLE } from "@constants";
-import { renderDonutFrame, donutGeometry, bannerWelcomeLines } from "@lib/terminalBanner";
+import { renderCatFrame, catGeometry, bannerWelcomeLines } from "@lib/terminalBanner";
 import useWindowsStore from "@store/window";
 
 const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
@@ -15,7 +15,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
     { label: "techstack", cmd: "techstack" },
     { label: "projects", cmd: "projects" },
     { label: "flappy", cmd: "flappy" },
-    { label: "donut", cmd: "donut" },
+    { label: "cat", cmd: "cat" },
     { label: "whoami", cmd: "whoami" },
     { label: "sudo", cmd: "sudo" },
   ];
@@ -111,6 +111,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         }
         println("\x1b[31mflappy: terminal not ready\x1b[0m");
         break;
+      case "cat":
       case "donut":
         if (term._isDonutActive?.()) return;
         term.write("\x1b[2J\x1b[H");
@@ -224,11 +225,9 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         t.write("\r\n" + msg + "\x1b[0m");
       };
 
-      bannerWelcomeLines(`Welcome to the portfolio!`).forEach((line) =>
-        t.writeln(line),
-      );
-      donutGeometry(t.cols) &&
-        renderDonutFrame(1.05, 0.55, donutGeometry(t.cols)).forEach((line) =>
+      bannerWelcomeLines(`Welcome to the portfolio!`).forEach((line) => t.writeln(line));
+      catGeometry(t.cols, t.rows) &&
+        renderCatFrame(1.05, 0.55, catGeometry(t.cols, t.rows)).forEach((line) =>
           t.writeln(` ${line}`),
         );
       t.write("Last login: " + new Date().toLocaleString() + " / type help?");
@@ -385,23 +384,22 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         stopDonut();
         t.write("\x1b[2J\x1b[H");
         bannerWelcomeLines(`Welcome to the portfolio!`).forEach((line) => t.writeln(line));
-        renderDonutFrame(1.05, 0.55, donutGeometry(t.cols)).forEach((line) => t.writeln(` ${line}`));
+        renderCatFrame(1.05, 0.55, catGeometry(t.cols, t.rows)).forEach((line) =>
+          t.writeln(` ${line}`),
+        );
         t.write("Last login: " + new Date().toLocaleString() + " / type help?");
         prompt();
       };
 
       const startDonut = () => {
         if (donut) return;
-        const geometry = donutGeometry(t.cols);
+        const geometry = catGeometry(t.cols, t.rows);
         let A = 1.0;
         let B = 0.4;
 
         const render = () => {
-          const out = [
-            `\x1b[2J\x1b[H\x1b[38;2;113;113;122m donut.c — a1k0n tribute \x1b[0m`,
-            "",
-          ];
-          renderDonutFrame(A, B, geometry).forEach((line) => out.push(` ${line}`));
+          const out = [`\x1b[2J\x1b[H\x1b[38;2;113;113;122m cat — sparkling eyes \x1b[0m`, ""];
+          renderCatFrame(A, B, geometry).forEach((line) => out.push(` ${line}`));
           out.push("");
           out.push("\x1b[38;2;113;113;122m tap to exit \x1b[0m");
           t.write(out.join("\r\n"));
@@ -410,7 +408,12 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         };
 
         render();
-        donut = { timer: setInterval(render, 60), geometry };
+        donut = {
+          timer: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? null
+            : setInterval(render, 160),
+          geometry,
+        };
         if (term) term._donutTimer = donut.timer;
         t._startDonut = startDonut;
         t._isDonutActive = () => Boolean(donut);
@@ -421,6 +424,10 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
         };
         terminalEl.addEventListener("pointerdown", term._donutTap);
       };
+
+      t._startDonut = startDonut;
+      t._isDonutActive = () => Boolean(donut);
+      if (t.cols >= 26) startDonut();
 
       t.onData((data) => {
         const code = data.charCodeAt(0);
@@ -480,7 +487,7 @@ const TerminalInput = ({ terminalRef, xtermRef, fitAddonRef, commandRef }) => {
                 "\x1b[1;38;2;242;100;44mflappy\x1b[0m    \x1b[38;2;75;85;99m- Play ascii flappy bird (tap)\x1b[0m",
               );
               println(
-                "\x1b[1;38;2;242;100;44mdonut\x1b[0m     \x1b[38;2;75;85;99m- Spin the donut.c ascii torus\x1b[0m",
+                "\x1b[1;38;2;242;100;44mcat\x1b[0m     \x1b[38;2;75;85;99m- Show the live sparkling cat\x1b[0m",
               );
               println(
                 "\x1b[1;38;2;16;185;129msudo\x1b[0m      \x1b[38;2;75;85;99m- Run superuser command\x1b[0m",

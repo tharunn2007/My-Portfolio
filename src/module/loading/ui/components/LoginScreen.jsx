@@ -1,4 +1,6 @@
+import { sessionState } from "@lib/storage";
 import { useState, useEffect } from "react";
+import MatrixRain from "./MatrixRain";
 import {
   ArrowRight,
   Moon,
@@ -251,7 +253,7 @@ const LoginScreen = ({ onLogin, isMobile }) => {
       <div
         className="fixed inset-0 z-50 flex flex-col items-center justify-between text-white select-none overflow-hidden"
         style={{
-          backgroundImage: "url('/wallpapers/mobile/mobile-wallpaper.webp')",
+          isolation: "isolate",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -262,6 +264,7 @@ const LoginScreen = ({ onLogin, isMobile }) => {
           }
         }}
       >
+        <MatrixRain />
         {/* Dynamic abstract wallpaper patterns */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-purple-900/30 via-transparent to-transparent pointer-events-none z-0" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-900/40 via-transparent to-transparent pointer-events-none z-0" />
@@ -704,7 +707,7 @@ const LoginScreen = ({ onLogin, isMobile }) => {
       `}</style>
 
       <div
-        className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-black/10 backdrop-blur-lg select-none py-12 px-6"
+        className="fixed inset-0 z-50 flex flex-col items-center justify-between isolate select-none py-12 px-6"
         onClick={() => {
           if (!showPasswordInput) {
             triggerFullscreen();
@@ -712,6 +715,7 @@ const LoginScreen = ({ onLogin, isMobile }) => {
           }
         }}
       >
+        <MatrixRain />
         {!showPasswordInput ? (
           /* Lock Screen Phase */
           <div className="flex flex-col items-center justify-between h-full w-full max-w-lg text-white">
@@ -858,7 +862,7 @@ const LoginScreen = ({ onLogin, isMobile }) => {
               <button
                 className="flex flex-col items-center gap-2 group outline-none cursor-pointer"
                 onClick={() => {
-                  sessionStorage.setItem("isRestartingSystem", "true");
+                  sessionState.setItem("isRestartingSystem", "true");
                   window.location.reload();
                 }}
               >

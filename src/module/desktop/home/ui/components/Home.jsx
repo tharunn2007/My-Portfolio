@@ -266,7 +266,7 @@ const Home = () => {
       onDrop={handleDrop}
       onContextMenu={handleDesktopContextMenu}
     >
-      {/* Live paper-print fluid wallpaper (WebGL; static body bg as fallback) */}
+      {/* Continuous neon video wallpaper */}
       <FluidWallpaper />
       <ul>
         {visibleProjects.map((project) => (

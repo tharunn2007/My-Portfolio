@@ -25,6 +25,8 @@ const STUNNING_ALBUM_COVERS = [
   "https://images.unsplash.com/photo-1446057032654-9d8885b7a391?w=500&auto=format&fit=crop&q=80",
 ];
 
+const EMPTY_TRACKS = [];
+
 const useMusic = () => {
   const { music, setMusicState, focusWindow } = useWindowsStore();
   const activeTrack = music.activeTrack;
@@ -32,8 +34,11 @@ const useMusic = () => {
   const volume = music.volume;
   const isMuted = music.isMuted;
 
-  const tracks = music.tracks || [];
-  const setTracks = (newTracks) => setMusicState({ tracks: newTracks });
+  const tracks = music.tracks || EMPTY_TRACKS;
+  const setTracks = useCallback(
+    (newTracks) => setMusicState({ tracks: newTracks }),
+    [setMusicState],
+  );
   const isShuffle = music.isShuffle;
   const setIsShuffle = (val) => setMusicState({ isShuffle: val });
   const isRepeat = music.isRepeat;
@@ -75,6 +80,7 @@ const useMusic = () => {
   }, [activeTrack, setMusicState]);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchTracks = async () => {
       setIsLoading(true);
       try {
@@ -114,8 +120,12 @@ const useMusic = () => {
           }
         }
 
-        const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?${params}`);
+        const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?${params}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error("Music service unavailable");
         const data = await res.json();
+        if (controller.signal.aborted) return;
 
         if (data.headers && data.headers.status === "success" && data.results) {
           const formattedTracks = data.results.map((track, index) => {
@@ -141,17 +151,21 @@ const useMusic = () => {
           setTracks([]);
         }
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error("Failed to fetch Jamendo tracks:", err);
         setTracks([]);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     };
     const timer = setTimeout(() => {
       fetchTracks();
     }, 450);
-    return () => clearTimeout(timer);
-  }, [activeCategory, searchQuery]);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [activeCategory, searchQuery, setTracks]);
 
   useEffect(() => {
     if (tracks.length > 0 && activeTrack.id === 0) {

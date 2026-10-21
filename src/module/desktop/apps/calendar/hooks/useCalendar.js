@@ -1,9 +1,13 @@
+import { readStoredArrayText, writeStoredCollection } from "@lib/storage";
 import { OWNER_FIRST_NAME } from "@constants";
 import { useState, useEffect } from "react";
 
+const formatCalendarDate = (date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
 const useCalendar = () => {
-  const [currentDate] = useState(new Date(2026, 4, 26));
-  const [selectedDate, setSelectedDate] = useState(new Date(2026, 4, 26));
+  const [currentDate] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const [month, setMonth] = useState(currentDate.getMonth());
@@ -18,7 +22,7 @@ const useCalendar = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [eventTitle, setEventTitle] = useState("");
-  const [eventDate, setEventDate] = useState("2026-05-26");
+  const [eventDate, setEventDate] = useState(() => formatCalendarDate(new Date()));
   const [eventStart, setEventStart] = useState("09:00");
   const [eventEnd, setEventEnd] = useState("10:00");
   const [eventCategory, setEventCategory] = useState("personal");
@@ -27,7 +31,7 @@ const useCalendar = () => {
   const [dayEventsPopover, setDayEventsPopover] = useState(null);
 
   const [events, setEvents] = useState(() => {
-    const saved = localStorage.getItem("macos_portfolio_calendar_events");
+    const saved = readStoredArrayText("macos_portfolio_calendar_events");
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -85,7 +89,7 @@ const useCalendar = () => {
   });
 
   useEffect(() => {
-    localStorage.setItem("macos_portfolio_calendar_events", JSON.stringify(events));
+    writeStoredCollection("macos_portfolio_calendar_events", events);
   }, [events]);
 
   const toggleCategory = (catId) => {
@@ -123,7 +127,7 @@ const useCalendar = () => {
   const generateGrid = () => {
     const totalDays = getDaysInMonth(year, month);
     const firstDayIndex = getFirstDayIndex(year, month);
-    const prevMonthDaysCount = getDaysInMonth(year, month - 1 < 0 ? 11 : month - 1);
+    const prevMonthDaysCount = getDaysInMonth(year, month - 1);
     const gridCells = [];
 
     for (let i = firstDayIndex - 1; i >= 0; i--) {
@@ -154,7 +158,7 @@ const useCalendar = () => {
   const filteredEvents = getFilteredEvents();
 
   const getEventsForDate = (dateObj) => {
-    const dateString = dateObj.toLocaleDateString("en-CA");
+    const dateString = formatCalendarDate(dateObj);
     return filteredEvents.filter((event) => event.date === dateString);
   };
 
@@ -164,7 +168,7 @@ const useCalendar = () => {
 
     const newEvent = {
       id: Date.now().toString(),
-      title: eventTitle,
+      title: eventTitle.trim(),
       date: eventDate,
       start: eventStart,
       end: eventEnd,
@@ -189,7 +193,7 @@ const useCalendar = () => {
   };
 
   const triggerAddEventOnDate = (dateObj) => {
-    const formattedDate = dateObj.toLocaleDateString("en-CA");
+    const formattedDate = formatCalendarDate(dateObj);
     setEventDate(formattedDate);
     setIsModalOpen(true);
   };

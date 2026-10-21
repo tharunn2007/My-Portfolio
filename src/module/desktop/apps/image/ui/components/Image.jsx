@@ -17,6 +17,7 @@ import {
 import PhotosAboutModal from "../../../photos/ui/components/PhotosAboutModal";
 
 const WINDOW_KEY = "imgfile";
+const EMPTY_DATA = {};
 
 const ImageApp = () => {
   const {
@@ -29,7 +30,7 @@ const ImageApp = () => {
     setWindowData,
   } = useWindowsStore();
 
-  const data = windows[WINDOW_KEY]?.data || {};
+  const data = windows[WINDOW_KEY]?.data || EMPTY_DATA;
   const photos = data.photos || (data.imageUrl ? [data] : []);
 
   const [currentIndex, setCurrentIndex] = useState(() => data.currentIndex ?? 0);

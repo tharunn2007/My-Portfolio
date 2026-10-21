@@ -3,7 +3,9 @@ import { ChevronLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const WindowControls = ({ target, onBack }) => {
-  const { closeWindow, toggleMaximize, minimizeWindow } = useWindowsStore();
+  const closeWindow = useWindowsStore((state) => state.closeWindow);
+  const toggleMaximize = useWindowsStore((state) => state.toggleMaximize);
+  const minimizeWindow = useWindowsStore((state) => state.minimizeWindow);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -16,8 +18,9 @@ const WindowControls = ({ target, onBack }) => {
   if (isMobile) {
     return (
       <button
+        type="button"
+        aria-label="Go back"
         onClick={(e) => {
-          console.log("Back button clicked in WindowControls for target:", target);
           if (onBack) {
             onBack(e);
           } else {
@@ -33,7 +36,7 @@ const WindowControls = ({ target, onBack }) => {
           gap: 2,
           fontSize: 12,
           fontWeight: 500,
-          padding: "0",
+          padding: "8px 4px",
           cursor: "pointer",
           position: "relative",
           zIndex: 30,
@@ -48,9 +51,27 @@ const WindowControls = ({ target, onBack }) => {
 
   return (
     <div id="window-controls">
-      <div className="close" onClick={() => closeWindow(target)} />
-      <div className="minimize" onClick={() => minimizeWindow(target)} title="Minimize" />
-      <div className="maximize" onClick={() => toggleMaximize(target)} title="Zoom" />
+      <button
+        type="button"
+        className="close"
+        aria-label="Close window"
+        title="Close"
+        onClick={() => closeWindow(target)}
+      />
+      <button
+        type="button"
+        className="minimize"
+        aria-label="Minimize window"
+        onClick={() => minimizeWindow(target)}
+        title="Minimize"
+      />
+      <button
+        type="button"
+        className="maximize"
+        aria-label="Toggle maximize window"
+        onClick={() => toggleMaximize(target)}
+        title="Zoom"
+      />
     </div>
   );
 };

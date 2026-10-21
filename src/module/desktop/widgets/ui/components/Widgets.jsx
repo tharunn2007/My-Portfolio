@@ -25,161 +25,58 @@ const HEAT_COLORS = [
   "#39d353", // 4 — most contributions
 ];
 
-const HEAT_WEEKS = 26;
-
-const mulberry32 = (seed) => () => {
-  seed |= 0;
-  seed = (seed + 0x6d2b79f5) | 0;
-  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-};
-
-const seededDays = (days) => {
-  let seed = 0;
-  for (const ch of GITHUB_USER) seed = (seed * 31 + ch.charCodeAt(0)) | 0;
-  const rand = mulberry32(seed);
-  const today = new Date();
-  return Array.from({ length: days }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - (days - 1 - i));
-    const dow = date.getDay();
-    const r = rand();
-    const weekendFactor = dow === 0 || dow === 6 ? 0.62 : 1;
-    let level = 0;
-    if (r < 0.35 * weekendFactor) level = 0;
-    else if (r < 0.57 * weekendFactor) level = 1;
-    else if (r < 0.73 * weekendFactor) level = 2;
-    else if (r < 0.87 * weekendFactor) level = 3;
-    else level = 4;
-    return { date, level, count: level === 0 ? 0 : level * 3 };
-  });
-};
-
 const GithubHeatmapWidget = () => {
-  const [days, setDays] = useState(null); // null = loading
-
+  const year = new Date().getFullYear();
+  const [contributions, setContributions] = useState(null);
   useEffect(() => {
     let mounted = true;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
-
-    fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USER}?y=last`, {
-      signal: controller.signal,
-    })
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("api"))))
-      .then((data) => {
-        if (!mounted || !Array.isArray(data?.contributions)) return;
-        const mapped = data.contributions.slice(-HEAT_WEEKS * 7).map((c) => ({
-          date: new Date(`${c.date}T00:00:00`),
-          level: Math.max(0, Math.min(4, c.level)),
-          count: c.count || 0,
-        }));
-        if (mapped.length) setDays(mapped);
-      })
-      .catch(() => {
-        if (mounted) setDays(seededDays(HEAT_WEEKS * 7));
-      })
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USER}?y=${year}`, { signal: controller.signal })
+      .then(res => { if (!res.ok) throw new Error("GitHub unavailable"); return res.json(); })
+      .then(data => { if (!Array.isArray(data.contributions)) throw new Error("Invalid calendar"); if (mounted) setContributions(data.contributions); })
+      .catch(() => { if (mounted) setContributions([]); })
       .finally(() => clearTimeout(timeout));
-
-    return () => {
-      mounted = false;
-      controller.abort();
-      clearTimeout(timeout);
-    };
-  }, []);
-
-  const display = days ?? seededDays(HEAT_WEEKS * 7);
-  const weeks = useMemo(() => {
-    const chunks = [];
-    for (let i = 0; i < display.length; i += 7) chunks.push(display.slice(i, i + 7));
-    return chunks;
-  }, [display]);
-
-  const total = display.reduce((sum, d) => sum + d.count, 0);
-
-  // Month labels: mark the first week where each new month starts.
-  const monthLabels = useMemo(() => {
-    const labels = [];
-    let lastMonth = -1;
-    weeks.forEach((week, index) => {
-      const first = week[0]?.date;
-      if (!first) return;
-      if (first.getMonth() !== lastMonth) {
-        lastMonth = first.getMonth();
-        labels.push({ index, name: first.toLocaleDateString("en-US", { month: "short" }) });
-      }
+    return () => { mounted = false; clearTimeout(timeout); controller.abort(); };
+  }, [year]);
+  const { cells, columns, labels, total } = useMemo(() => {
+    const entries = new Map((contributions || []).map(day => [day.date, day]));
+    const first = new Date(year, 0, 1);
+    const last = new Date(year, 11, 31);
+    const count = Math.round((Date.UTC(year, 11, 31) - Date.UTC(year, 0, 1)) / 86400000) + 1;
+    const columns = Math.ceil((first.getDay() + count) / 7);
+    const cells = Array.from({length: columns * 7}, (_, i) => {
+      const date = new Date(year, 0, i - first.getDay() + 1);
+      const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+      const entry = entries.get(key);
+      return { key, valid: date >= first && date <= last, future: date > new Date(), count: entry?.count || 0, level: Math.max(0, Math.min(4, entry?.level || 0)) };
     });
-    return labels;
-  }, [weeks]);
-
-  const cell = 9;
-  const gap = 3;
-  const gridWidth = weeks.length * (cell + gap);
-
+    const labels = Array.from({length: 12}, (_, month) => {
+      const day = new Date(year, month, 1);
+      const offset = Math.round((Date.UTC(year, month, 1) - Date.UTC(year, 0, 1)) / 86400000);
+      return {name: day.toLocaleDateString("en-US", {month: "short"}), column: Math.floor((first.getDay() + offset) / 7)};
+    });
+    return {cells, columns, labels, total: cells.filter(d => d.valid).reduce((sum,d) => sum+d.count,0)};
+  }, [year, contributions]);
   return (
-    <button
-      type="button"
-      onClick={() => window.open(GITHUB_PROFILE, "_blank", "noopener,noreferrer")}
+    <button type="button" onClick={() => window.open(GITHUB_PROFILE, "_blank", "noopener,noreferrer")}
       className="liquid-glass flex h-full w-full flex-col rounded-2xl p-3 text-left text-white shadow-lg"
-      aria-label={`Open ${GITHUB_USER}'s GitHub profile`}
-    >
-      <div className="flex items-center justify-between">
-        <span className="flex items-center gap-1.5 text-[11px] font-semibold tracking-wide">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#39d353]" />
-          @{GITHUB_USER}
-        </span>
-        <span className="text-[10px] text-white/55">{total} contributions</span>
+      aria-label={`${GITHUB_USER}'s ${year} GitHub contributions, January through December`}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] font-semibold text-emerald-300">@{GITHUB_USER}</span>
+        <span className="text-[10px] text-white/65">{contributions === null ? "Loading…" : contributions.length ? `${total} contributions` : "Data unavailable"}</span>
       </div>
-
-      <div className="mt-2.5 flex-1 overflow-hidden">
-        <div className="relative" style={{ width: gridWidth }}>
-          <div className="relative mb-1 h-3">
-            {monthLabels.map(({ index, name }) => (
-              <span
-                key={`${name}-${index}`}
-                className="absolute top-0 text-[8px] font-medium text-white/45"
-                style={{ left: index * (cell + gap) }}
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-          <div
-            className="grid"
-            style={{
-              gridTemplateRows: "repeat(7, 9px)",
-              gridAutoFlow: "column",
-              gridAutoColumns: "9px",
-              gap: "3px",
-            }}
-          >
-            {display.map((day, index) => (
-              <span
-                key={index}
-                title={`${day.date?.toLocaleDateString?.("en-US") ?? ""} — ${day.count} contributions`}
-                className="rounded-[2px] transition-transform hover:scale-125"
-                style={{
-                  width: `${cell}px`,
-                  height: `${cell}px`,
-                  backgroundColor: HEAT_COLORS[day.level] ?? HEAT_COLORS[0],
-                  boxShadow: day.level > 0 ? `0 0 5px ${HEAT_COLORS[day.level]}40` : "none",
-                }}
-              />
-            ))}
-          </div>
+      <div className="my-auto w-full py-3">
+        <div className="mb-2 grid h-3 text-[7px] text-white/65" style={{gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`}}>
+          {labels.map(label => <span key={label.name} style={{gridColumn: `${label.column+1} / span 3`, gridRow: 1}}>{label.name}</span>)}
+        </div>
+        <div className="grid w-full gap-[1px]" style={{gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,gridTemplateRows: "repeat(7, auto)",gridAutoFlow: "column"}}>
+          {cells.map(day => <span key={day.key} title={day.valid ? `${day.key}: ${day.future ? "upcoming" : `${day.count} contributions`}` : undefined}
+            style={{aspectRatio: "1", borderRadius: 1, opacity: day.valid ? day.future ? 0.25 : 1 : 0, background: HEAT_COLORS[day.level]}} />)}
         </div>
       </div>
-
-      <div className="mt-1.5 flex items-center justify-between text-[8px] text-white/45">
-        <span>last {weeks.length} weeks</span>
-        <span className="flex items-center gap-1">
-          less
-          {HEAT_COLORS.map((color) => (
-            <span key={color} className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: color }} />
-          ))}
-          more
-        </span>
+      <div className="flex items-center justify-between text-[8px] text-white/60">
+        <span>Jan – Dec {year}</span><span className="flex items-center gap-1">Less {HEAT_COLORS.map(color => <span key={color} className="h-2 w-2 rounded-sm" style={{background:color}} />)} More</span>
       </div>
     </button>
   );

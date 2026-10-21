@@ -4,8 +4,7 @@ import { getMobileBookmarks, DEFAULT_TABS } from "../data";
 import { projects, PORTFOLIO_ALT_URL } from "@constants";
 
 // Config-driven project keyword → URL resolution for the address bar.
-const getProjectAliases = (project) =>
-  [project.title, ...(project.aliases ?? [])].filter(Boolean);
+const getProjectAliases = (project) => [project.title, ...(project.aliases ?? [])].filter(Boolean);
 
 const findProjectByQuery = (query) =>
   projects.find((project) =>
@@ -284,9 +283,14 @@ export default function useSafari() {
     }
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(currentUrl);
-    triggerToast("Copied Link to Clipboard");
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(currentUrl);
+      triggerToast("Copied Link to Clipboard");
+    } catch {
+      triggerToast("Couldn’t copy. Copy the address manually.");
+      return;
+    }
     setShowShareSheet(false);
   };
 

@@ -1,10 +1,11 @@
+import { sessionState } from "@lib/storage";
 import React, { useState, useEffect, useRef } from "react";
 import { Moon, Power, RotateCcw } from "lucide-react";
 
 const RefreshInterceptor = ({ enabled, isLoggedIn, setBooting, setIsLoggedIn }) => {
   const [showPopup, setShowPopup] = useState(() => {
     if (typeof window !== "undefined") {
-      const isRestarting = sessionStorage.getItem("isRestartingSystem") === "true";
+      const isRestarting = sessionState.getItem("isRestartingSystem") === "true";
       if (isRestarting) {
         return false;
       }
@@ -53,13 +54,13 @@ const RefreshInterceptor = ({ enabled, isLoggedIn, setBooting, setIsLoggedIn }) 
   // Sync login state to sessionStorage to remember it on reload
   useEffect(() => {
     if (enabled) {
-      sessionStorage.setItem("wasLoggedIn", isLoggedIn ? "true" : "false");
+      sessionState.setItem("wasLoggedIn", isLoggedIn ? "true" : "false");
     }
   }, [enabled, isLoggedIn]);
 
   // Detect browser reload on mount and restore state without showing browser warnings
   useEffect(() => {
-    if (sessionStorage.getItem("isRestartingSystem") === "true") {
+    if (sessionState.getItem("isRestartingSystem") === "true") {
       setBooting(true);
       setIsLoggedIn(false);
       setShowPopup(false);
@@ -73,7 +74,7 @@ const RefreshInterceptor = ({ enabled, isLoggedIn, setBooting, setIsLoggedIn }) 
     const isReload = navigationEntries[0] && navigationEntries[0].type === "reload";
 
     if (isReload) {
-      const savedWasLoggedIn = sessionStorage.getItem("wasLoggedIn") === "true";
+      const savedWasLoggedIn = sessionState.getItem("wasLoggedIn") === "true";
       setBooting(false);
       setIsLoggedIn(savedWasLoggedIn);
       setShowPopup(true);
@@ -108,7 +109,7 @@ const RefreshInterceptor = ({ enabled, isLoggedIn, setBooting, setIsLoggedIn }) 
   };
 
   const handleRestart = () => {
-    sessionStorage.setItem("isRestartingSystem", "true");
+    sessionState.setItem("isRestartingSystem", "true");
     isBypassingReload.current = true;
     window.location.reload();
   };

@@ -44,11 +44,21 @@ const checkDockCollision = () => {
 
 const windowWrapper = (Component, windowKey) => {
   const Wrapped = (props) => {
-    const { focusWindow, windows } = useWindowsStore();
-    const { isOpen, zIndex: baseZIndex } = windows[windowKey] || { isOpen: false, zIndex: 1000 };
+    const focusWindow = useWindowsStore((state) => state.focusWindow);
+    const windowState = useWindowsStore((state) => state.windows[windowKey]);
+    const { isOpen, zIndex: baseZIndex } = windowState || { isOpen: false, zIndex: 1000 };
     const zIndex = baseZIndex;
     const ref = useRef(null);
     const prevOpenRef = useRef(false);
+    const resizeCleanup = useRef(null);
+    const isMaximized = windowState?.isMaximized;
+    useEffect(
+      () => () => {
+        resizeCleanup.current?.();
+        document.body.classList.remove("window-dragging");
+      },
+      [],
+    );
     const [isMobile, setIsMobile] = useState(() =>
       typeof window !== "undefined" ? window.innerWidth < 768 : false,
     );
@@ -61,7 +71,7 @@ const windowWrapper = (Component, windowKey) => {
 
     useGSAP(() => {
       const el = ref.current;
-      if (!el || isMobile || !isOpen) return;
+      if (!el || isMobile || !isOpen || isMaximized) return;
 
       const headers = el.querySelectorAll("#window-header, .window-header");
       const dragTrigger = headers.length > 0 ? Array.from(headers) : el;
@@ -81,12 +91,13 @@ const windowWrapper = (Component, windowKey) => {
       });
 
       return () => {
+        document.body.classList.remove("window-dragging");
         instance.kill();
         checkDockCollision();
       };
-    }, [isMobile, isOpen]);
+    }, [isMobile, isOpen, isMaximized]);
 
-    const isMinimized = windows[windowKey]?.isMinimized;
+    const isMinimized = windowState?.isMinimized;
     const [shouldRender, setShouldRender] = useState(isOpen && !isMinimized);
     const prevMinimizedRef = useRef(isMinimized);
     const lastPosRef = useRef({ x: 0, y: 0 });
@@ -115,6 +126,15 @@ const windowWrapper = (Component, windowKey) => {
     useGSAP(() => {
       const el = ref.current;
       if (!el || isMobile) return;
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        gsap.killTweensOf(el);
+        gsap.set(el, { scale: 1, opacity: isOpen && !isMinimized ? 1 : 0 });
+        setShouldRender(isOpen && !isMinimized);
+        prevOpenRef.current = isOpen;
+        prevMinimizedRef.current = isMinimized;
+        return;
+      }
 
       // Case 1: Window opening
       if (isOpen && !isMinimized && !prevOpenRef.current) {
@@ -248,6 +268,7 @@ const windowWrapper = (Component, windowKey) => {
       // Ensure the window comes to front when resizing
       focusWindow(windowKey);
 
+      resizeCleanup.current?.();
       document.body.classList.add("window-resizing");
 
       const startX = e.clientX;
@@ -331,8 +352,12 @@ const windowWrapper = (Component, windowKey) => {
         document.body.classList.remove("window-resizing");
         window.removeEventListener("pointermove", handlePointerMove);
         window.removeEventListener("pointerup", handlePointerUp);
+        window.removeEventListener("pointercancel", handlePointerUp);
+        resizeCleanup.current = null;
       };
 
+      resizeCleanup.current = handlePointerUp;
+      window.addEventListener("pointercancel", handlePointerUp);
       window.addEventListener("pointermove", handlePointerMove);
       window.addEventListener("pointerup", handlePointerUp);
     };
@@ -363,15 +388,18 @@ const windowWrapper = (Component, windowKey) => {
     return (
       <section
         id={windowKey}
+        role="region"
+        aria-label={`${windowKey} window`}
+        inert={!isOpen || isMinimized ? true : undefined}
         ref={ref}
         style={isMobile ? mobileStyles : desktopStyles}
-        className={`${isMobile ? "" : "absolute"} ${windows[windowKey]?.isMaximized ? "maximized" : ""} ${shouldRender ? "window-visible" : "window-hidden"}`}
+        className={`${isMobile ? "" : "absolute"} ${windowState?.isMaximized ? "maximized" : ""} ${shouldRender ? "window-visible" : "window-hidden"}`}
         onPointerDown={() => {
           if (!isMobile) focusWindow(windowKey);
         }}
       >
         {shouldMountComponent ? componentElement : null}
-        {!isMobile && !windows[windowKey]?.isMaximized && !windows[windowKey]?.isMinimized && (
+        {!isMobile && !windowState?.isMaximized && !windowState?.isMinimized && (
           <>
             <div
               className="resize-handle resize-n"

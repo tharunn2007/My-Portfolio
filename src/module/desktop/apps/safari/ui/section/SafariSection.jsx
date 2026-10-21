@@ -14,6 +14,7 @@ const SIDEBAR_HIDE_THRESHOLD = 600; // auto-hide sidebar below this width
 const SafariSection = () => {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const safari = useSafari();
+  const { showSidebar, setShowSidebar } = safari;
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -33,13 +34,13 @@ const SafariSection = () => {
       const width = entries[0].contentRect.width;
       const tooNarrow = width < SIDEBAR_HIDE_THRESHOLD;
       setCanShowSidebar(!tooNarrow);
-      if (tooNarrow && safari.showSidebar) {
-        safari.setShowSidebar(false);
+      if (tooNarrow && showSidebar) {
+        setShowSidebar(false);
       }
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [isMobile, safari.showSidebar]);
+  }, [isMobile, showSidebar, setShowSidebar]);
 
   if (isMobile) {
     return (
