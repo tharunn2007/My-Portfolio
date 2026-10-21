@@ -5,6 +5,7 @@ export const WIDGET_OPTIONS = [
     type: "github-heatmap",
     label: "GitHub Heatmap",
   },
+  { type: "leetcode", label: "LeetCode" },
   {
     type: "clock",
     label: "Clock",
@@ -28,7 +29,15 @@ export const WIDGET_OPTIONS = [
 ];
 
 const useWidgetsStore = create((set) => ({
-  widgets: ["github-heatmap"],
+  widgets: ["github-heatmap", "leetcode"],
+  moveWidget: (type, targetIndex) =>
+    set((state) => {
+      const current = state.widgets.indexOf(type);
+      if (current < 0) return state;
+      const widgets = state.widgets.filter((widget) => widget !== type);
+      widgets.splice(Math.max(0, Math.min(targetIndex, widgets.length)), 0, type);
+      return { widgets };
+    }),
   toggleWidget: (type) =>
     set((state) => ({
       widgets: state.widgets.includes(type)

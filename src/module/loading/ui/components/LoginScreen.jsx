@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { AVATAR_URL, OWNER_NAME } from "@constants";
 
-const LoginScreen = ({ onLogin, isMobile }) => {
+const LoginScreen = ({ onLogin, isMobile, active = true }) => {
   const [password, setPassword] = useState("");
   const [isAsleep, setIsAsleep] = useState(false);
   const [isShuttingDown, setIsShuttingDown] = useState(false);
@@ -177,6 +177,7 @@ const LoginScreen = ({ onLogin, isMobile }) => {
   // Handle keypresses for Unlock (Enter) or Escape to go back
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (!active) return;
       if (!showPasswordInput) {
         if (e.key === "Enter" || e.key === " ") {
           triggerFullscreen();
@@ -193,7 +194,7 @@ const LoginScreen = ({ onLogin, isMobile }) => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showPasswordInput, isMobile]);
+  }, [showPasswordInput, isMobile, active]);
 
   const handleShutDown = () => {
     setIsShuttingDown(true);
@@ -251,20 +252,22 @@ const LoginScreen = ({ onLogin, isMobile }) => {
   if (isMobile) {
     return (
       <div
+        inert={!active ? true : undefined}
         className="fixed inset-0 z-50 flex flex-col items-center justify-between text-white select-none overflow-hidden"
         style={{
+          background: "#000",
           isolation: "isolate",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
         onClick={() => {
-          if (!showPasswordInput && !showCameraView) {
+          if (active && !showPasswordInput && !showCameraView) {
             triggerFullscreen();
             setShowPasswordInput(true);
           }
         }}
       >
-        <MatrixRain />
+        <MatrixRain active={active} />
         {/* Dynamic abstract wallpaper patterns */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-purple-900/30 via-transparent to-transparent pointer-events-none z-0" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-900/40 via-transparent to-transparent pointer-events-none z-0" />
@@ -707,15 +710,17 @@ const LoginScreen = ({ onLogin, isMobile }) => {
       `}</style>
 
       <div
+        inert={!active ? true : undefined}
+        style={{ background: "#000" }}
         className="fixed inset-0 z-50 flex flex-col items-center justify-between isolate select-none py-12 px-6"
         onClick={() => {
-          if (!showPasswordInput) {
+          if (active && !showPasswordInput) {
             triggerFullscreen();
             setShowPasswordInput(true);
           }
         }}
       >
-        <MatrixRain />
+        <MatrixRain active={active} />
         {!showPasswordInput ? (
           /* Lock Screen Phase */
           <div className="flex flex-col items-center justify-between h-full w-full max-w-lg text-white">

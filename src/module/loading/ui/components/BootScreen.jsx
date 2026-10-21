@@ -65,6 +65,9 @@ const BootScreen = ({ onComplete, isMobile: propIsMobile }) => {
     return (
       <div
         ref={containerRef}
+        style={{ background: "#000", isolation: "isolate" }}
+        role="status"
+        aria-label="Starting portfolio"
         className="fixed inset-0 z-99999 bg-black flex flex-col items-center justify-center py-12 px-6 select-none overflow-hidden"
       >
         {/* Apple Logo (Centered) */}
@@ -101,6 +104,9 @@ const BootScreen = ({ onComplete, isMobile: propIsMobile }) => {
   return (
     <div
       ref={containerRef}
+      style={{ background: "#000", isolation: "isolate" }}
+      role="status"
+      aria-label="Starting portfolio"
       className="fixed inset-0 z-99999 bg-black flex flex-col items-center justify-center gap-16"
     >
       <img src="/system/icons/apple/appleLogo.svg" alt="Apple Logo" width="70" height="70" />

@@ -94,15 +94,15 @@ const Home = () => {
 
     if (source === "dock" && appId) {
       const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left - 32; // center icon (half of w-16 = 32px)
-      const y = e.clientY - rect.top - 40;
+      const x = 8;
+      const y = Math.max(16, e.clientY - rect.top - 40);
       addDesktopShortcut(appId, x, y);
     }
   };
 
   useGSAP(() => {
     const instances = Draggable.create(".folder, .desktop-shortcut", {
-      bounds: "#home",
+      bounds: "#desktop-icon-area",
       allowContextMenu: true,
       cursor: "default",
       activeCursor: "default",
@@ -192,8 +192,8 @@ const Home = () => {
 
   const handleNewFolder = () => {
     const newId = `folder-custom-${Date.now()}`;
-    const x = Math.max(20, Math.min(contextMenu?.x || 100, window.innerWidth - 120));
-    const y = Math.max(50, Math.min((contextMenu?.y || 100) - 35, window.innerHeight - 150));
+    const x = 8;
+    const y = 16 + (visibleProjects.length + customFolders.length + desktopShortcuts.length) * 112;
     setCustomFolders((prev) => [
       ...prev,
       {
@@ -268,75 +268,85 @@ const Home = () => {
     >
       {/* Continuous neon video wallpaper */}
       <FluidWallpaper />
-      <ul>
-        {visibleProjects.map((project) => (
-          <HomeFolder
-            key={project.id}
-            project={project}
-            displayName={renamedProjects[project.id]}
-            isEditing={editingFolderId === project.id}
-            onRename={(newName) => handleRenameProject(project.id, newName)}
-            onClick={() => handleOpenProjectFinder(project)}
-            onContextMenu={handleFolderContextMenu}
-          />
-        ))}
+      <div className="absolute inset-y-0 left-4 w-32 overflow-y-auto">
+        <ul
+          id="desktop-icon-area"
+          className="relative w-full"
+          style={{
+            minHeight: "100%",
+            height: `${(visibleProjects.length + customFolders.length + desktopShortcuts.length) * 112 + 32}px`,
+          }}
+        >
+          {visibleProjects.map((project, index) => (
+            <HomeFolder
+              key={project.id}
+              project={project}
+              position={index}
+              displayName={renamedProjects[project.id]}
+              isEditing={editingFolderId === project.id}
+              onRename={(newName) => handleRenameProject(project.id, newName)}
+              onClick={() => handleOpenProjectFinder(project)}
+              onContextMenu={handleFolderContextMenu}
+            />
+          ))}
 
-        {customFolders.map((folder) => {
-          const isEditing = editingFolderId === folder.id;
-          return (
-            <li
-              key={folder.id}
-              data-id={folder.id}
-              data-custom="true"
-              className="folder cursor-default absolute select-none flex items-center flex-col"
-              style={{
-                left: `${folder.x}px`,
-                top: `${folder.y}px`,
-              }}
-              onPointerDown={() => {
-                suppressCustomFolderClickRef.current = null;
-              }}
-              onClick={() => {
-                if (suppressCustomFolderClickRef.current === folder.id) {
+          {customFolders.map((folder) => {
+            const isEditing = editingFolderId === folder.id;
+            return (
+              <li
+                key={folder.id}
+                data-id={folder.id}
+                data-custom="true"
+                className="folder cursor-default absolute select-none flex items-center flex-col"
+                style={{
+                  left: `${folder.x}px`,
+                  top: `${folder.y}px`,
+                }}
+                onPointerDown={() => {
                   suppressCustomFolderClickRef.current = null;
-                  return;
-                }
-                if (!isEditing) openWindow("finder");
-              }}
-              onContextMenu={(e) => handleFolderContextMenu(e, folder)}
-            >
-              <div className="w-[62px] h-[52px] flex items-center justify-center pointer-events-none">
-                <OptimizedImage
-                  src="/system/icons/files/folder.webp"
-                  alt={folder.name}
-                  width={62}
-                  height={52}
-                  className="w-full h-full object-contain pointer-events-none"
-                />
-              </div>
-              {isEditing ? (
-                <FolderRenameInput
-                  initialValue={folder.name}
-                  onSave={(val) => handleRenameCustomFolder(folder.id, val)}
-                  onCancel={() => setEditingFolderId(null)}
-                />
-              ) : (
-                <p>{folder.name}</p>
-              )}
-            </li>
-          );
-        })}
+                }}
+                onClick={() => {
+                  if (suppressCustomFolderClickRef.current === folder.id) {
+                    suppressCustomFolderClickRef.current = null;
+                    return;
+                  }
+                  if (!isEditing) openWindow("finder");
+                }}
+                onContextMenu={(e) => handleFolderContextMenu(e, folder)}
+              >
+                <div className="w-[62px] h-[52px] flex items-center justify-center pointer-events-none">
+                  <OptimizedImage
+                    src="/system/icons/files/folder.webp"
+                    alt={folder.name}
+                    width={62}
+                    height={52}
+                    className="w-full h-full object-contain pointer-events-none"
+                  />
+                </div>
+                {isEditing ? (
+                  <FolderRenameInput
+                    initialValue={folder.name}
+                    onSave={(val) => handleRenameCustomFolder(folder.id, val)}
+                    onCancel={() => setEditingFolderId(null)}
+                  />
+                ) : (
+                  <p>{folder.name}</p>
+                )}
+              </li>
+            );
+          })}
 
-        {desktopShortcuts.map((shortcut) => (
-          <DesktopShortcut
-            key={shortcut.id}
-            shortcut={shortcut}
-            onDoubleClick={() => handleOpenApp(shortcut.appId)}
-            onRemove={() => removeDesktopShortcut(shortcut.id)}
-            onContextMenu={handleShortcutContextMenu}
-          />
-        ))}
-      </ul>
+          {desktopShortcuts.map((shortcut) => (
+            <DesktopShortcut
+              key={shortcut.id}
+              shortcut={shortcut}
+              onDoubleClick={() => handleOpenApp(shortcut.appId)}
+              onRemove={() => removeDesktopShortcut(shortcut.id)}
+              onContextMenu={handleShortcutContextMenu}
+            />
+          ))}
+        </ul>
+      </div>
 
       {/* macOS Desktop Context Menu */}
       <DesktopContextMenu

@@ -4,6 +4,8 @@ import useWindowsStore from "@store/window";
 import useWidgetsStore from "@store/widgets";
 import useTimeStore from "@store/time";
 import AnalogClockFace from "./AnalogClockFace";
+import LeetCodeWidget from "./LeetCodeWidget";
+import gsap from "gsap";
 import WEATHER_DATA from "@module/desktop/apps/weather/data/weatherData";
 import { GITHUB_PROFILE } from "@constants";
 import { useGSAP } from "@gsap/react";
@@ -11,10 +13,11 @@ import { Draggable } from "gsap/Draggable";
 
 // ---------------------------------------------------------------------------
 // GitHub contribution heatmap — GitHub's official green palette (dark UI).
-// Data: live GitHub contributions (jogruber API) with a deterministic
-// seeded fallback so the widget always looks alive even offline.
+// Data: live GitHub contributions (jogruber API); unavailable data is labeled.
 // ---------------------------------------------------------------------------
-const GITHUB_USER = (GITHUB_PROFILE || "https://github.com/tharunn2007").replace(/\/$/, "").split("/").pop() || "tharunn2007";
+const GITHUB_USER =
+  (GITHUB_PROFILE || "https://github.com/tharunn2007").replace(/\/$/, "").split("/").pop() ||
+  "tharunn2007";
 
 // GitHub dark-theme contribution scale: empty → #0e4429 → #006d32 → #26a641 → #39d353.
 const HEAT_COLORS = [
@@ -32,51 +35,126 @@ const GithubHeatmapWidget = () => {
     let mounted = true;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
-    fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USER}?y=${year}`, { signal: controller.signal })
-      .then(res => { if (!res.ok) throw new Error("GitHub unavailable"); return res.json(); })
-      .then(data => { if (!Array.isArray(data.contributions)) throw new Error("Invalid calendar"); if (mounted) setContributions(data.contributions); })
-      .catch(() => { if (mounted) setContributions([]); })
+    fetch(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USER}?y=${year}`, {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("GitHub unavailable");
+        return res.json();
+      })
+      .then((data) => {
+        if (!Array.isArray(data.contributions)) throw new Error("Invalid calendar");
+        if (mounted) setContributions(data.contributions);
+      })
+      .catch(() => {
+        if (mounted) setContributions([]);
+      })
       .finally(() => clearTimeout(timeout));
-    return () => { mounted = false; clearTimeout(timeout); controller.abort(); };
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, [year]);
   const { cells, columns, labels, total } = useMemo(() => {
-    const entries = new Map((contributions || []).map(day => [day.date, day]));
+    const entries = new Map((contributions || []).map((day) => [day.date, day]));
     const first = new Date(year, 0, 1);
     const last = new Date(year, 11, 31);
     const count = Math.round((Date.UTC(year, 11, 31) - Date.UTC(year, 0, 1)) / 86400000) + 1;
     const columns = Math.ceil((first.getDay() + count) / 7);
-    const cells = Array.from({length: columns * 7}, (_, i) => {
+    const cells = Array.from({ length: columns * 7 }, (_, i) => {
       const date = new Date(year, 0, i - first.getDay() + 1);
-      const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
       const entry = entries.get(key);
-      return { key, valid: date >= first && date <= last, future: date > new Date(), count: entry?.count || 0, level: Math.max(0, Math.min(4, entry?.level || 0)) };
+      return {
+        key,
+        valid: date >= first && date <= last,
+        future: date > new Date(),
+        count: entry?.count || 0,
+        level: Math.max(0, Math.min(4, entry?.level || 0)),
+      };
     });
-    const labels = Array.from({length: 12}, (_, month) => {
+    const labels = Array.from({ length: 12 }, (_, month) => {
       const day = new Date(year, month, 1);
       const offset = Math.round((Date.UTC(year, month, 1) - Date.UTC(year, 0, 1)) / 86400000);
-      return {name: day.toLocaleDateString("en-US", {month: "short"}), column: Math.floor((first.getDay() + offset) / 7)};
+      return {
+        name: day.toLocaleDateString("en-US", { month: "short" }),
+        column: Math.floor((first.getDay() + offset) / 7),
+      };
     });
-    return {cells, columns, labels, total: cells.filter(d => d.valid).reduce((sum,d) => sum+d.count,0)};
+    return {
+      cells,
+      columns,
+      labels,
+      total: cells.filter((d) => d.valid).reduce((sum, d) => sum + d.count, 0),
+    };
   }, [year, contributions]);
   return (
-    <button type="button" onClick={() => window.open(GITHUB_PROFILE, "_blank", "noopener,noreferrer")}
+    <button
+      type="button"
+      onClick={() => window.open(GITHUB_PROFILE, "_blank", "noopener,noreferrer")}
       className="liquid-glass flex h-full w-full flex-col rounded-2xl p-3 text-left text-white shadow-lg"
-      aria-label={`${GITHUB_USER}'s ${year} GitHub contributions, January through December`}>
+      aria-label={`${GITHUB_USER}'s ${year} GitHub contributions, January through December`}
+    >
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] font-semibold text-emerald-300">@{GITHUB_USER}</span>
-        <span className="text-[10px] text-white/65">{contributions === null ? "Loading…" : contributions.length ? `${total} contributions` : "Data unavailable"}</span>
+        <span className="text-[10px] text-white/65">
+          {contributions === null
+            ? "Loading…"
+            : contributions.length
+              ? `${total} contributions`
+              : "Data unavailable"}
+        </span>
       </div>
       <div className="my-auto w-full py-3">
-        <div className="mb-2 grid h-3 text-[7px] text-white/65" style={{gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`}}>
-          {labels.map(label => <span key={label.name} style={{gridColumn: `${label.column+1} / span 3`, gridRow: 1}}>{label.name}</span>)}
+        <div
+          className="mb-2 grid h-3 text-[7px] text-white/65"
+          style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+        >
+          {labels.map((label) => (
+            <span
+              key={label.name}
+              style={{ gridColumn: `${label.column + 1} / span 3`, gridRow: 1 }}
+            >
+              {label.name}
+            </span>
+          ))}
         </div>
-        <div className="grid w-full gap-[1px]" style={{gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,gridTemplateRows: "repeat(7, auto)",gridAutoFlow: "column"}}>
-          {cells.map(day => <span key={day.key} title={day.valid ? `${day.key}: ${day.future ? "upcoming" : `${day.count} contributions`}` : undefined}
-            style={{aspectRatio: "1", borderRadius: 1, opacity: day.valid ? day.future ? 0.25 : 1 : 0, background: HEAT_COLORS[day.level]}} />)}
+        <div
+          className="grid w-full gap-[1px]"
+          style={{
+            gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+            gridTemplateRows: "repeat(7, auto)",
+            gridAutoFlow: "column",
+          }}
+        >
+          {cells.map((day) => (
+            <span
+              key={day.key}
+              title={
+                day.valid
+                  ? `${day.key}: ${day.future ? "upcoming" : `${day.count} contributions`}`
+                  : undefined
+              }
+              style={{
+                aspectRatio: "1",
+                borderRadius: 1,
+                opacity: day.valid ? (day.future ? 0.25 : 1) : 0,
+                background: HEAT_COLORS[day.level],
+              }}
+            />
+          ))}
         </div>
       </div>
       <div className="flex items-center justify-between text-[8px] text-white/60">
-        <span>Jan – Dec {year}</span><span className="flex items-center gap-1">Less {HEAT_COLORS.map(color => <span key={color} className="h-2 w-2 rounded-sm" style={{background:color}} />)} More</span>
+        <span>Jan – Dec {year}</span>
+        <span className="flex items-center gap-1">
+          Less{" "}
+          {HEAT_COLORS.map((color) => (
+            <span key={color} className="h-2 w-2 rounded-sm" style={{ background: color }} />
+          ))}{" "}
+          More
+        </span>
       </div>
     </button>
   );
@@ -278,6 +356,7 @@ const NotesWidget = () => {
 };
 
 const WIDGET_SIZES = {
+  leetcode: { width: 360, height: 400 },
   "github-heatmap": { width: 344, height: 200 },
   "clock-calendar": { width: 264, height: 310 },
   clock: { width: 190, height: 130 },
@@ -288,6 +367,11 @@ const WIDGET_SIZES = {
 };
 
 const WIDGET_SIZE_OPTIONS = {
+  leetcode: {
+    small: { width: 328, height: 400 },
+    medium: { width: 360, height: 400 },
+    large: { width: 400, height: 430 },
+  },
   "github-heatmap": {
     small: { width: 280, height: 170 },
     medium: { width: 344, height: 200 },
@@ -325,6 +409,7 @@ const WIDGET_SIZE_OPTIONS = {
 };
 
 const WIDGET_LABELS = {
+  leetcode: "LeetCode",
   "github-heatmap": "GitHub Heatmap",
   "clock-calendar": "Time & Calendar",
   clock: "Clock",
@@ -381,8 +466,7 @@ const WidgetContextMenu = ({ menu, onClose, onRemove, onResize, onOpen, size }) 
         background: "rgba(22, 22, 26, 0.86)",
         backdropFilter: "blur(14px) saturate(120%)",
         WebkitBackdropFilter: "blur(14px) saturate(120%)",
-        boxShadow:
-          "0 18px 40px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)",
+        boxShadow: "0 18px 40px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.25)",
       }}
       onPointerDown={(event) => event.stopPropagation()}
       onContextMenu={(event) => {
@@ -441,6 +525,7 @@ const WidgetContextMenu = ({ menu, onClose, onRemove, onResize, onOpen, size }) 
 };
 
 const WIDGET_COMPONENTS = {
+  leetcode: LeetCodeWidget,
   "github-heatmap": GithubHeatmapWidget,
   "clock-calendar": ClockCalendarWidget,
   clock: ClockWidget,
@@ -452,6 +537,7 @@ const WIDGET_COMPONENTS = {
 
 const DesktopWidgets = () => {
   const widgets = useWidgetsStore((state) => state.widgets);
+  const moveWidget = useWidgetsStore((state) => state.moveWidget);
   const toggleWidget = useWidgetsStore((state) => state.toggleWidget);
   const replaceWidget = useWidgetsStore((state) => state.replaceWidget);
   const time = useTimeStore((state) => state.time);
@@ -473,44 +559,66 @@ const DesktopWidgets = () => {
   );
 
   useGSAP(() => {
-    const elements = widgetsLayerRef.current?.querySelectorAll(".desktop-widget");
-    if (!elements?.length) return;
-
-    const instances = Draggable.create(elements, {
-      bounds: "#desktop-area",
-      allowContextMenu: true,
-      dragClickables: true,
-      cursor: "default",
-      activeCursor: "grabbing",
-      onDragStart: () => document.body.classList.add("widget-dragging"),
-      onDragEnd: () => document.body.classList.remove("widget-dragging"),
-      onRelease: () => document.body.classList.remove("widget-dragging"),
-    });
+    const elements = [...(widgetsLayerRef.current?.querySelectorAll(".desktop-widget") || [])];
+    if (!elements.length) return;
+    const instances = elements.flatMap((element) =>
+      Draggable.create(element, {
+        trigger: element.querySelector(".widget-drag-handle"),
+        bounds: widgetsLayerRef.current,
+        allowContextMenu: true,
+        dragClickables: true,
+        cursor: "grab",
+        activeCursor: "grabbing",
+        onDragStart() {
+          document.body.classList.add("widget-dragging");
+          this.target.style.zIndex = "5";
+        },
+        onDragEnd() {
+          const candidate = elements.find(
+            (other) => other !== this.target && this.hitTest(other, "35%"),
+          );
+          if (candidate)
+            moveWidget(this.target.dataset.widget, widgets.indexOf(candidate.dataset.widget));
+          // Reordering snaps back into grid tracks; no overlapping resting positions.
+          gsap.set(this.target, { x: 0, y: 0 });
+          this.target.style.zIndex = "";
+          document.body.classList.remove("widget-dragging");
+        },
+        onRelease() {
+          document.body.classList.remove("widget-dragging");
+        },
+      }),
+    );
     return () => {
       document.body.classList.remove("widget-dragging");
       instances.forEach((instance) => instance.kill());
     };
-  }, [widgetIds]);
+  }, [widgetIds, moveWidget]);
 
-  const columns = Math.max(
-    1,
-    Math.floor(((typeof window === "undefined" ? 1440 : window.innerWidth) - 80) / 280),
+  const columnWidth = Math.max(
+    280,
+    ...widgets.map((type) => (widgetSizes[type]?.dimensions || WIDGET_SIZES[type])?.width || 0),
   );
 
   return (
     <div
       ref={widgetsLayerRef}
-      className={`pointer-events-none absolute inset-0 z-[2] ${isAnyWindowOpen ? "desktop-dimmed" : ""}`}
+      className={`desktop-widget-grid pointer-events-none absolute bottom-[112px] left-[160px] right-4 top-[55px] z-[2] grid items-start gap-4 overflow-y-auto p-2 ${isAnyWindowOpen ? "desktop-dimmed" : ""}`}
+      aria-label="Desktop widgets"
+      style={{
+        gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${columnWidth}px), ${columnWidth}px))`,
+        justifyContent: "end",
+        alignContent: "start",
+      }}
     >
       {widgets.map((type, index) => {
         const Widget = WIDGET_COMPONENTS[type];
         const size = widgetSizes[type]?.dimensions || WIDGET_SIZES[type];
         if (!Widget || !size) return null;
-        const row = Math.floor(index / columns);
-        const column = index % columns;
         return (
           <div
             key={type}
+            data-widget={type}
             className="widget-container desktop-widget pointer-events-auto"
             onContextMenu={(event) => {
               event.preventDefault();
@@ -518,12 +626,27 @@ const DesktopWidgets = () => {
               setWidgetMenu({ type, x: event.clientX, y: event.clientY });
             }}
             style={{
-              width: `${size.width}px`,
-              height: `${size.height}px`,
-              top: `${135 + row * 330}px`,
-              right: `${40 + column * 280}px`,
+              position: "relative",
+              width: `min(100%, ${size.width}px)`,
+              height: `${size.height + 14}px`,
+              padding: "14px 0 0",
+              justifySelf: "end",
             }}
           >
+            <button
+              type="button"
+              className="widget-drag-handle absolute left-1/2 top-0 flex h-3 w-12 -translate-x-1/2 items-center justify-center rounded-full text-white/50 hover:bg-white/10"
+              aria-label={`Move ${WIDGET_LABELS[type]} widget; use arrow keys to reorder`}
+              title="Drag to reorder, or use arrow keys"
+              onKeyDown={(event) => {
+                if (["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].includes(event.key)) {
+                  event.preventDefault();
+                  moveWidget(type, index + (["ArrowUp", "ArrowLeft"].includes(event.key) ? -1 : 1));
+                }
+              }}
+            >
+              <span className="h-0.5 w-6 rounded-full bg-white/35" />
+            </button>
             {type === "clock" || type === "analog-clock" || type === "clock-calendar" ? (
               <Widget time={time} />
             ) : (

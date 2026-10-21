@@ -1,13 +1,21 @@
-import clsx from "clsx";
 import OptimizedImage from "@module/shared/ui/components/OptimizedImage";
 import FolderRenameInput from "./FolderRenameInput";
 
-const HomeFolder = ({ project, displayName, isEditing, onRename, onClick, onContextMenu }) => {
+const HomeFolder = ({
+  project,
+  displayName,
+  isEditing,
+  onRename,
+  onClick,
+  onContextMenu,
+  position,
+}) => {
   const currentName = displayName || project.name;
 
   return (
     <li
-      className={clsx("folder cursor-default", project.windowPosition)}
+      className="folder cursor-default"
+      style={{ left: 8, top: position * 112 + 16 }}
       onClick={isEditing ? undefined : onClick}
       onContextMenu={(e) => {
         if (onContextMenu) {
