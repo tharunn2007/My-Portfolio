@@ -45,6 +45,12 @@ function getRecord(element) {
   record.update = (mutations) => {
     // Root opacity/transform belongs to the animation, not its captured content.
     if (mutations.some((entry) => {
+      if (["name", "tabindex", "role", "draggable"].includes(entry.attributeName) || entry.attributeName?.startsWith("aria-")) return false;
+      if (entry.type === "attributes" && entry.oldValue === entry.target.getAttribute(entry.attributeName)) return false;
+      if (entry.attributeName === "style" && entry.target !== element) {
+        const paintedStyle = (value) => (value ?? "").replace(/(?:touch-action|cursor|user-select):[^;]*;?/g, "").trim();
+        if (paintedStyle(entry.oldValue) === paintedStyle(entry.target.getAttribute("style"))) return false;
+      }
       if (entry.target !== element) return true;
       if (entry.type === "childList") {
         const nodes = [...entry.addedNodes, ...entry.removedNodes];
@@ -61,6 +67,10 @@ function getRecord(element) {
       record.texture = null;
     }
   };
+  record.invalidate = () => { record.version++; record.texture = null; };
+  element.addEventListener("input", record.invalidate, true);
+  element.addEventListener("change", record.invalidate, true);
+  element.addEventListener("load", record.invalidate, true);
   record.observer = new MutationObserver(record.update);
   record.observer.observe(element, { attributes: true, attributeOldValue: true, childList: true, characterData: true, subtree: true });
   windows.set(element, record);
@@ -68,7 +78,13 @@ function getRecord(element) {
 }
 
 export function releaseWindowTexture(element) {
-  windows.get(element)?.observer.disconnect();
+  const record = windows.get(element);
+  record?.observer.disconnect();
+  if (record) {
+    element.removeEventListener("input", record.invalidate, true);
+    element.removeEventListener("change", record.invalidate, true);
+    element.removeEventListener("load", record.invalidate, true);
+  }
   windows.delete(element);
 }
 
@@ -76,7 +92,10 @@ export async function snapshotWindow(element, rect, signal) {
   signal?.throwIfAborted();
   const record = getRecord(element);
   record.update(record.observer.takeRecords());
-  if (record.texture && record.captured === record.version &&
+  const appearance = [document.documentElement.className, document.documentElement.style.cssText,
+    document.documentElement.getAttribute("data-theme"), document.body.className,
+    element.style.cssText.replace(/(?:opacity|visibility|transform|translate|rotate|scale|will-change|pointer-events|z-index|display|left|top):[^;]*;?/g, "")].join("|");
+  if (record.texture && record.captured === record.version && record.appearance === appearance &&
       record.width === rect.width && record.height === rect.height) return record.texture;
   const version = record.version;
   const clone = element.cloneNode(true);
@@ -148,19 +167,25 @@ export async function snapshotWindow(element, rect, signal) {
   image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   await image.decode();
   signal?.throwIfAborted();
-  const canvas = document.createElement("canvas");
   // Bound texture upload cost on large/high-DPI windows.
   const scale = Math.min(window.devicePixelRatio || 1, 1.25, 1600 / Math.max(rect.width, rect.height));
-  canvas.width = Math.max(1, Math.round(rect.width * scale));
-  canvas.height = Math.max(1, Math.round(rect.height * scale));
+  const width = Math.max(1, Math.round(rect.width * scale));
+  const height = Math.max(1, Math.round(rect.height * scale));
+  const canvas = typeof OffscreenCanvas === "function"
+    ? new OffscreenCanvas(width, height) : document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
   const context = canvas.getContext("2d");
   context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  // Transfer the flattened pixels without a Canvas-to-WebGL readback when supported.
+  const texture = canvas.transferToImageBitmap ? canvas.transferToImageBitmap() : canvas;
   record.update(record.observer.takeRecords());
   if (record.version === version) {
-    record.texture = canvas;
+    record.texture = texture;
     record.captured = version;
+    record.appearance = appearance;
     record.width = rect.width;
     record.height = rect.height;
   }
-  return canvas;
+  return texture;
 }

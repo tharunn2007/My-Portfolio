@@ -16,6 +16,8 @@ const checkDockCollision = () => {
   const windowsList = document.querySelectorAll("main > section");
   let collision = false;
   for (const winEl of windowsList) {
+    const state = useWindowsStore.getState().windows[winEl.id];
+    if (!state?.isOpen || state.isMinimized) continue;
     if (
       winEl.style.display !== "none" &&
       winEl.id &&
@@ -156,11 +158,14 @@ const windowWrapper = (Component, windowKey) => {
       } else if (visible && !wasOpen) {
         lastPosRef.current = { x: 0, y: 0 };
       }
-      gsap.set(el, { display: "block", ...lastPosRef.current, scaleX: 1, scaleY: 1, opacity: 1,
+      gsap.set(el, { display: "block", ...lastPosRef.current, scaleX: 1, scaleY: 1, opacity: 1, visibility: "visible",
         clearProps: "clipPath,transformOrigin,willChange" });
       const finish = () => {
         setShouldRender(visible);
-        el.style.display = visible ? "block" : "none";
+        // Keep minimized geometry intact so responsive content does not see a
+        // zero-width window and rebuild itself during the next restore.
+        el.style.display = visible || isOpen ? "block" : "none";
+        el.style.visibility = visible ? "visible" : "hidden";
         checkDockCollision();
       };
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -227,7 +232,9 @@ const windowWrapper = (Component, windowKey) => {
 
     const desktopStyles = {
       zIndex: shouldRender && !isOpen ? 100000 : zIndex,
-      display: shouldRender ? "block" : "none",
+      display: isOpen || shouldRender ? "block" : "none",
+      visibility: isMinimized && !shouldRender ? "hidden" : "visible",
+      pointerEvents: isOpen && !isMinimized ? "auto" : "none",
     };
 
     const handleResizeStart = (e, direction) => {

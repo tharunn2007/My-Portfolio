@@ -46,7 +46,7 @@ function createRenderer() {
   const canvas = document.createElement("canvas");
   canvas.setAttribute("aria-hidden", "true");
   Object.assign(canvas.style, { position: "fixed", inset: "0", width: "100vw", height: "100vh",
-    pointerEvents: "none", zIndex: "100001", display: "none", background: "transparent" });
+    pointerEvents: "none", zIndex: "100001", display: "block", background: "transparent" });
   const gl = canvas.getContext("webgl", { alpha: true, antialias: true, premultipliedAlpha: true });
   if (!gl) throw new Error("WebGL unavailable");
   const resources = [];
@@ -119,7 +119,6 @@ function createRenderer() {
     };
     const idle = () => {
       gl.clear(gl.COLOR_BUFFER_BIT);
-      canvas.style.display = "none";
       canvas.removeAttribute("data-genie-overlay");
     };
     const trimTextures = () => {
@@ -149,7 +148,7 @@ function createRenderer() {
         if (elapsed === 1) {
           jobs.delete(job);
           job.entry.users--;
-          job.finish();
+          queueMicrotask(job.finish);
         }
       }
       if (jobs.size) frame = requestAnimationFrame(tick);
@@ -196,7 +195,6 @@ function createRenderer() {
           const job = { ...options, texture, entry, start: null };
           jobs.add(job);
           canvas.dataset.genieOverlay = "true";
-          canvas.style.display = "block";
           if (!frame) frame = requestAnimationFrame(tick);
           return () => {
             if (!jobs.delete(job)) return;
