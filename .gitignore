@@ -32,3 +32,8 @@ graphify-out
 .venv
 local_graphify
 graphify
+node_modules
+.next
+.env
+*.db
+*.zip
