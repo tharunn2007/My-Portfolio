@@ -315,3 +315,14 @@
     --dock-item-height: 60px;
   }
 }
+
+/* Animate the item wrapper independently of hover magnification on its button. */
+@keyframes dockAppAppear {
+  from { transform: translateY(12px) scale(0.65); }
+  to { transform: translateY(0) scale(1); }
+}
+.dock-item { animation: dockAppAppear 180ms ease-out; }
+#dock:has(.dock-container:empty) { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .dock-item { animation: none; }
+}

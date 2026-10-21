@@ -101,6 +101,9 @@ const windowWrapper = (Component, windowKey) => {
     const [shouldRender, setShouldRender] = useState(isOpen && !isMinimized);
     const prevMinimizedRef = useRef(isMinimized);
     const lastPosRef = useRef({ x: 0, y: 0 });
+    const animationRef = useRef(null);
+    const dockTargetRef = useRef(null);
+    useEffect(() => () => animationRef.current?.kill(), []);
 
     useEffect(() => {
       if (isMobile) return;
@@ -127,84 +130,72 @@ const windowWrapper = (Component, windowKey) => {
       const el = ref.current;
       if (!el || isMobile) return;
 
+      const visible = isOpen && !isMinimized;
+      const wasOpen = prevOpenRef.current;
+      const wasVisible = wasOpen && !prevMinimizedRef.current;
+      prevOpenRef.current = isOpen;
+      prevMinimizedRef.current = isMinimized;
+      if (visible === wasVisible) return;
+
+      const wasAnimating = animationRef.current?.isActive();
+      animationRef.current?.kill();
+      gsap.killTweensOf(el);
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.killTweensOf(el);
-        gsap.set(el, { scale: 1, opacity: isOpen && !isMinimized ? 1 : 0 });
-        setShouldRender(isOpen && !isMinimized);
-        prevOpenRef.current = isOpen;
-        prevMinimizedRef.current = isMinimized;
+        gsap.set(el, {
+          ...lastPosRef.current, scaleX: 1, scaleY: 1, opacity: visible ? 1 : 0,
+          clearProps: "clipPath,transformOrigin,willChange",
+        });
+        setShouldRender(visible);
         return;
       }
 
-      // Case 1: Window opening
-      if (isOpen && !isMinimized && !prevOpenRef.current) {
-        gsap.killTweensOf(el);
-        gsap.fromTo(
-          el,
-          { scale: 0.85, opacity: 0, y: 30, x: 0 },
-          { scale: 1, opacity: 1, y: 0, x: 0, duration: 0.35, ease: "back.out(1.1)" },
-        );
-      }
-      // Case 2: Window closing
-      else if (!isOpen && prevOpenRef.current) {
-        gsap.killTweensOf(el);
-        gsap.to(el, {
-          scale: 0.85,
-          opacity: 0,
-          y: 30,
-          duration: 0.25,
-          ease: "power2.inOut",
-          onComplete: () => {
-            setShouldRender(false);
-          },
-        });
-      }
-      // Case 3: Window minimizing
-      else if (isOpen && isMinimized && !prevMinimizedRef.current) {
-        // Save current coordinates
+      // Measure at rest: the saved drag position must survive minimize/restore.
+      if (!visible && wasVisible && !wasAnimating) {
         lastPosRef.current = {
-          x: gsap.getProperty(el, "x") || 0,
-          y: gsap.getProperty(el, "y") || 0,
+          x: Number(gsap.getProperty(el, "x")) || 0,
+          y: Number(gsap.getProperty(el, "y")) || 0,
         };
-        const startRect = el.getBoundingClientRect();
-        gsap.killTweensOf(el);
-        gsap.to(el, {
-          scale: 0.15,
-          opacity: 0,
-          y: window.innerHeight - 80,
-          x: window.innerWidth / 2 - startRect.width / 2, // animate to bottom-center dock area
-          duration: 0.35,
-          ease: "power2.inOut",
-          onComplete: () => {
-            setShouldRender(false);
-          },
-        });
+      } else if (visible && !wasOpen) {
+        lastPosRef.current = { x: 0, y: 0 };
       }
-      // Case 4: Window restoring (unminimizing)
-      else if (isOpen && !isMinimized && prevMinimizedRef.current) {
-        const startRect = el.getBoundingClientRect();
-        gsap.killTweensOf(el);
-        gsap.fromTo(
-          el,
-          {
-            scale: 0.15,
-            opacity: 0,
-            y: window.innerHeight - 80,
-            x: window.innerWidth / 2 - startRect.width / 2,
-          },
-          {
-            scale: 1,
-            opacity: 1,
-            y: lastPosRef.current.y,
-            x: lastPosRef.current.x,
-            duration: 0.38,
-            ease: "back.out(1.1)",
-          },
-        );
+      gsap.set(el, {
+        display: "block", ...lastPosRef.current, scaleX: 1, scaleY: 1,
+        transformOrigin: "50% 100%", clipPath: "polygon(0% 0%, 100% 0%, 100% 25%, 100% 50%, 100% 75%, 100% 100%, 0% 100%, 0% 75%, 0% 50%, 0% 25%)",
+        willChange: "transform, clip-path, opacity",
+      });
+      const rect = el.getBoundingClientRect();
+      const icon = document.querySelector(`[data-app-id="${windowKey}"] .dock-icon`);
+      if (icon) {
+        const bounds = icon.getBoundingClientRect();
+        dockTargetRef.current = { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
       }
-
-      prevOpenRef.current = isOpen;
-      prevMinimizedRef.current = isMinimized;
+      const target = dockTargetRef.current ?? { x: window.innerWidth / 2, y: window.innerHeight - 36 };
+      const rest = { ...lastPosRef.current, scaleX: 1, scaleY: 1, opacity: 1,
+        clipPath: "polygon(0% 0%, 100% 0%, 100% 25%, 100% 50%, 100% 75%, 100% 100%, 0% 100%, 0% 75%, 0% 50%, 0% 25%)" };
+      const tip = {
+        x: lastPosRef.current.x + target.x - (rect.left + rect.width / 2),
+        y: lastPosRef.current.y + target.y - rect.bottom,
+        scaleX: Math.min(0.08, 24 / Math.max(rect.width, 1)), scaleY: 0.025,
+        opacity: 0,
+        clipPath: "polygon(42% 0%, 58% 0%, 61% 25%, 70% 50%, 85% 75%, 100% 100%, 0% 100%, 15% 75%, 30% 50%, 39% 25%)",
+      };
+      const neck = {
+        x: rest.x + (tip.x - rest.x) * 0.35,
+        y: rest.y + (tip.y - rest.y) * 0.45,
+        scaleX: 0.6, scaleY: 0.85, opacity: 0.95,
+        clipPath: "polygon(0% 0%, 100% 0%, 96% 25%, 84% 50%, 69% 75%, 64% 100%, 36% 100%, 31% 75%, 16% 50%, 4% 25%)",
+      };
+      if (visible) setShouldRender(true);
+      gsap.set(el, visible ? tip : rest);
+      animationRef.current = gsap.timeline({
+        onComplete: () => {
+          setShouldRender(visible);
+          gsap.set(el, { ...rest, opacity: visible ? 1 : 0,
+            display: visible ? "block" : "none", clearProps: "clipPath,transformOrigin,willChange" });
+          checkDockCollision();
+        },
+      }).to(el, { ...neck, duration: visible ? 0.26 : 0.18, ease: "power2.inOut" })
+        .to(el, { ...(visible ? rest : tip), duration: visible ? 0.22 : 0.28, ease: visible ? "power2.out" : "power3.in" });
     }, [isOpen, isMinimized, isMobile]);
 
     const [viewportHeight, setViewportHeight] = useState("100dvh");
@@ -254,7 +245,7 @@ const windowWrapper = (Component, windowKey) => {
     };
 
     const desktopStyles = {
-      zIndex,
+      zIndex: shouldRender && !isOpen ? 100000 : zIndex,
       display: shouldRender ? "block" : "none",
     };
 

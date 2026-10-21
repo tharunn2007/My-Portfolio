@@ -1,4 +1,5 @@
-import { dockApps, locations } from "@constants";
+import { locations } from "@constants";
+import { getRunningDockApps } from "../../../../../lib/dock-state";
 import useWindowsStore from "@store/window";
 import useLocationStore from "@store/location";
 import { Fragment, useMemo, useState, useRef, useEffect, useCallback } from "react";
@@ -9,7 +10,7 @@ import useDock from "../../hooks/useDock";
 const Dock = () => {
   const {
     openWindow,
-    closeWindow,
+    focusWindow,
     unminimizeWindow,
     windows,
     isDockHiddenByCollision,
@@ -43,9 +44,8 @@ const Dock = () => {
   }, [windows]);
 
   const orderedDockApps = useMemo(() => {
-    if (!dockAppIds) return dockApps;
-    return dockAppIds.map((id) => dockApps.find((app) => app.id === id)).filter(Boolean);
-  }, [dockAppIds]);
+    return getRunningDockApps(windows, dockAppIds);
+  }, [dockAppIds, windows]);
 
   const toggleApp = (app) => {
     if (!app.canOpen) return;
@@ -59,7 +59,7 @@ const Dock = () => {
         } else {
           const activeLocation = useLocationStore.getState().activeLocation;
           if (activeLocation?.id === locations.trash.id) {
-            closeWindow("finder");
+            focusWindow("finder");
           } else {
             unminimizeWindow("finder");
           }
@@ -79,7 +79,7 @@ const Dock = () => {
         } else {
           const activeLocation = useLocationStore.getState().activeLocation;
           if (activeLocation?.id === locations.work.id) {
-            closeWindow("finder");
+            focusWindow("finder");
           } else {
             unminimizeWindow("finder");
           }
@@ -96,7 +96,7 @@ const Dock = () => {
       if (window.isMinimized) {
         unminimizeWindow(appId);
       } else {
-        closeWindow(appId);
+        focusWindow(appId);
       }
     } else {
       openWindow(appId);

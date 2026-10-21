@@ -109,6 +109,7 @@ const useWindowsStore = create(
       set((state) => {
         const win = state.windows[windowKey];
         if (!win) return;
+        if (!state.dockAppIds.includes(windowKey)) state.dockAppIds.push(windowKey);
         win.isOpen = true;
         win.isMinimized = false;
         win.zIndex = state.nextZIndex;
