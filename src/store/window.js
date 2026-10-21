@@ -1,3 +1,4 @@
+import { rememberDockTarget } from "../lib/dock-target.js";
 import { immer } from "zustand/middleware/immer";
 import { create } from "zustand";
 import { INITIAL_Z_INDEX, WINDOW_CONFIG, dockApps, DEFAULT_DOCK_IDS } from "@constants";
@@ -118,6 +119,7 @@ const useWindowsStore = create(
       }),
     closeWindow: (windowKey) =>
       set((state) => {
+        rememberDockTarget(windowKey);
         const win = state.windows[windowKey];
         if (!win) return;
         win.isOpen = false;
@@ -128,6 +130,7 @@ const useWindowsStore = create(
     closeAllWindows: () =>
       set((state) => {
         Object.keys(state.windows).forEach((key) => {
+          rememberDockTarget(key);
           const win = state.windows[key];
           if (win) {
             win.isOpen = false;
@@ -145,6 +148,7 @@ const useWindowsStore = create(
       }),
     minimizeWindow: (windowKey) =>
       set((state) => {
+        rememberDockTarget(windowKey);
         const win = state.windows[windowKey];
         if (!win) return;
         win.isMinimized = true;

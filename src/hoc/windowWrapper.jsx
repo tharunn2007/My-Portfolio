@@ -1,4 +1,7 @@
 import useWindowsStore from "@store/window";
+import { animateWindowGenie, warmGenieRenderer } from "@lib/window-genie";
+import { getDockTarget } from "@lib/dock-target";
+import { releaseWindowTexture } from "@lib/window-texture";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
@@ -102,8 +105,14 @@ const windowWrapper = (Component, windowKey) => {
     const prevMinimizedRef = useRef(isMinimized);
     const lastPosRef = useRef({ x: 0, y: 0 });
     const animationRef = useRef(null);
-    const dockTargetRef = useRef(null);
-    useEffect(() => () => animationRef.current?.kill(), []);
+    useEffect(() => {
+      const element = ref.current;
+      warmGenieRenderer();
+      return () => {
+        animationRef.current?.kill();
+        if (element) releaseWindowTexture(element);
+      };
+    }, []);
 
     useEffect(() => {
       if (isMobile) return;
@@ -137,20 +146,9 @@ const windowWrapper = (Component, windowKey) => {
       prevMinimizedRef.current = isMinimized;
       if (visible === wasVisible) return;
 
-      const wasAnimating = animationRef.current?.isActive();
       animationRef.current?.kill();
       gsap.killTweensOf(el);
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.set(el, {
-          ...lastPosRef.current, scaleX: 1, scaleY: 1, opacity: visible ? 1 : 0,
-          clearProps: "clipPath,transformOrigin,willChange",
-        });
-        setShouldRender(visible);
-        return;
-      }
-
-      // Measure at rest: the saved drag position must survive minimize/restore.
-      if (!visible && wasVisible && !wasAnimating) {
+      if (!visible && wasVisible) {
         lastPosRef.current = {
           x: Number(gsap.getProperty(el, "x")) || 0,
           y: Number(gsap.getProperty(el, "y")) || 0,
@@ -158,44 +156,27 @@ const windowWrapper = (Component, windowKey) => {
       } else if (visible && !wasOpen) {
         lastPosRef.current = { x: 0, y: 0 };
       }
-      gsap.set(el, {
-        display: "block", ...lastPosRef.current, scaleX: 1, scaleY: 1,
-        transformOrigin: "50% 100%", clipPath: "polygon(0% 0%, 100% 0%, 100% 25%, 100% 50%, 100% 75%, 100% 100%, 0% 100%, 0% 75%, 0% 50%, 0% 25%)",
-        willChange: "transform, clip-path, opacity",
-      });
-      const rect = el.getBoundingClientRect();
-      const icon = document.querySelector(`[data-app-id="${windowKey}"] .dock-icon`);
-      if (icon) {
-        const bounds = icon.getBoundingClientRect();
-        dockTargetRef.current = { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
+      gsap.set(el, { display: "block", ...lastPosRef.current, scaleX: 1, scaleY: 1, opacity: 1,
+        clearProps: "clipPath,transformOrigin,willChange" });
+      const finish = () => {
+        setShouldRender(visible);
+        el.style.display = visible ? "block" : "none";
+        checkDockCollision();
+      };
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        finish();
+        return;
       }
-      const target = dockTargetRef.current ?? { x: window.innerWidth / 2, y: window.innerHeight - 36 };
-      const rest = { ...lastPosRef.current, scaleX: 1, scaleY: 1, opacity: 1,
-        clipPath: "polygon(0% 0%, 100% 0%, 100% 25%, 100% 50%, 100% 75%, 100% 100%, 0% 100%, 0% 75%, 0% 50%, 0% 25%)" };
-      const tip = {
-        x: lastPosRef.current.x + target.x - (rect.left + rect.width / 2),
-        y: lastPosRef.current.y + target.y - rect.bottom,
-        scaleX: Math.min(0.08, 24 / Math.max(rect.width, 1)), scaleY: 0.025,
-        opacity: 0,
-        clipPath: "polygon(42% 0%, 58% 0%, 61% 25%, 70% 50%, 85% 75%, 100% 100%, 0% 100%, 15% 75%, 30% 50%, 39% 25%)",
-      };
-      const neck = {
-        x: rest.x + (tip.x - rest.x) * 0.35,
-        y: rest.y + (tip.y - rest.y) * 0.45,
-        scaleX: 0.6, scaleY: 0.85, opacity: 0.95,
-        clipPath: "polygon(0% 0%, 100% 0%, 96% 25%, 84% 50%, 69% 75%, 64% 100%, 36% 100%, 31% 75%, 16% 50%, 4% 25%)",
-      };
       if (visible) setShouldRender(true);
-      gsap.set(el, visible ? tip : rest);
-      animationRef.current = gsap.timeline({
-        onComplete: () => {
-          setShouldRender(visible);
-          gsap.set(el, { ...rest, opacity: visible ? 1 : 0,
-            display: visible ? "block" : "none", clearProps: "clipPath,transformOrigin,willChange" });
-          checkDockCollision();
-        },
-      }).to(el, { ...neck, duration: visible ? 0.26 : 0.18, ease: "power2.inOut" })
-        .to(el, { ...(visible ? rest : tip), duration: visible ? 0.22 : 0.28, ease: visible ? "power2.out" : "power3.in" });
+      // Cache both boxes once. No layout reads occur inside the frame loop.
+      const target = getDockTarget(windowKey, !visible);
+      const rect = el.getBoundingClientRect();
+      animationRef.current = animateWindowGenie(el, {
+        opening: visible,
+        rect,
+        target,
+        onComplete: finish,
+      });
     }, [isOpen, isMinimized, isMobile]);
 
     const [viewportHeight, setViewportHeight] = useState("100dvh");
